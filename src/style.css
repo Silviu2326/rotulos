@@ -1,0 +1,443 @@
+@import url("https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap");
+@import "tailwindcss";
+
+/* ========================================
+   RÓTULOS PRO - SISTEMA MINIMALISTA
+   Paleta: Blanco, Morado, Negro
+   ======================================== */
+
+:root {
+  /* Colores Principales - Minimalista */
+  --primary-white: #ffffff;
+  --primary-purple: #7c3aed;
+  --primary-purple-light: #a78bfa;
+  --primary-purple-dark: #5b21b6;
+
+  /* Superficies */
+  --surface-white: #ffffff;
+  --surface-gray-50: #fafafa;
+  --surface-gray-100: #f5f5f5;
+  --surface-gray-200: #e5e5e5;
+  --surface-gray-300: #d4d4d4;
+
+  /* Negros y Grises */
+  --black: #000000;
+  --gray-900: #171717;
+  --gray-800: #262626;
+  --gray-700: #404040;
+  --gray-600: #525252;
+  --gray-500: #737373;
+  --gray-400: #a3a3a3;
+  --gray-300: #d4d4d4;
+  --gray-200: #e5e5e5;
+  --gray-100: #f5f5f5;
+
+  /* Estados */
+  --status-success: #22c55e;
+  --status-warning: #f59e0b;
+  --status-error: #ef4444;
+
+  /* Sombras suaves */
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md:
+    0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+  --shadow-lg:
+    0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+  --shadow-xl:
+    0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+  --shadow-purple: 0 4px 14px 0 rgba(124, 58, 237, 0.25);
+
+  /* Tipografía */
+  --font-primary: "Plus Jakarta Sans", system-ui, sans-serif;
+
+  /* Bordes */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+  --radius-full: 9999px;
+}
+
+/* ========================================
+   RESET Y BASE
+   ======================================== */
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  scrollbar-width: thin;
+  scrollbar-color: var(--primary-purple) var(--gray-100);
+}
+
+*::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+*::-webkit-scrollbar-track {
+  background: var(--gray-100);
+  border-radius: var(--radius-full);
+}
+
+*::-webkit-scrollbar-thumb {
+  background: var(--primary-purple);
+  border-radius: var(--radius-full);
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background: var(--primary-purple-dark);
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: var(--font-primary);
+  background-color: var(--surface-gray-50);
+  color: var(--gray-900);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ========================================
+   COMPONENTES MINIMALISTAS
+   ======================================== */
+
+/* Panel Base */
+.minimal-card {
+  background: var(--surface-white);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--gray-200);
+  transition: all 0.2s ease;
+}
+
+.minimal-card:hover {
+  box-shadow: var(--shadow-md);
+  transform: translateY(-1px);
+}
+
+/* Botón Minimalista */
+.minimal-btn {
+  font-family: var(--font-primary);
+  font-weight: 600;
+  font-size: 0.875rem;
+  padding: 10px 20px;
+  background: var(--surface-white);
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius-md);
+  color: var(--gray-700);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.minimal-btn:hover {
+  background: var(--gray-50);
+  border-color: var(--gray-300);
+}
+
+.minimal-btn-primary {
+  background: var(--primary-purple);
+  border-color: var(--primary-purple);
+  color: white;
+}
+
+.minimal-btn-primary:hover {
+  background: var(--primary-purple-dark);
+  border-color: var(--primary-purple-dark);
+  box-shadow: var(--shadow-purple);
+}
+
+/* Input Minimalista */
+.minimal-input {
+  font-family: var(--font-primary);
+  background: var(--surface-white);
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius-md);
+  color: var(--gray-900);
+  padding: 12px 16px;
+  outline: none;
+  transition: all 0.2s ease;
+  font-size: 0.875rem;
+}
+
+.minimal-input:focus {
+  border-color: var(--primary-purple);
+  box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1);
+}
+
+.minimal-input::placeholder {
+  color: var(--gray-400);
+}
+
+/* Badge Minimalista */
+.minimal-badge {
+  font-family: var(--font-primary);
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 4px 10px;
+  background: var(--gray-100);
+  border-radius: var(--radius-full);
+  color: var(--gray-600);
+}
+
+.minimal-badge-purple {
+  background: rgba(124, 58, 237, 0.1);
+  color: var(--primary-purple);
+}
+
+/* ========================================
+   ESTADOS
+   ======================================== */
+
+.status-minimal {
+  font-family: var(--font-primary);
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 5px 12px;
+  border-radius: var(--radius-full);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.status-pending {
+  background: rgba(245, 158, 11, 0.1);
+  color: #d97706;
+}
+
+.status-progress {
+  background: rgba(124, 58, 237, 0.1);
+  color: var(--primary-purple);
+}
+
+.status-shipped {
+  background: rgba(59, 130, 246, 0.1);
+  color: #2563eb;
+}
+
+.status-completed {
+  background: rgba(34, 197, 94, 0.1);
+  color: #16a34a;
+}
+
+/* ========================================
+   ANIMACIONES
+   ======================================== */
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pulse-soft {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
+.animate-fade-in {
+  animation: fadeInUp 0.4s ease forwards;
+}
+
+.animate-pulse-soft {
+  animation: pulse-soft 2s ease-in-out infinite;
+}
+
+/* ========================================
+   TIPOGRAFÍA
+   ======================================== */
+
+.text-gradient {
+  background: linear-gradient(
+    135deg,
+    var(--primary-purple) 0%,
+    var(--primary-purple-light) 100%
+  );
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ========================================
+   CHARTS - Personalización Recharts
+   ======================================== */
+
+.recharts-cartesian-grid-horizontal line,
+.recharts-cartesian-grid-vertical line {
+  stroke: var(--gray-200);
+}
+
+.recharts-text {
+  font-family: var(--font-primary) !important;
+  font-size: 12px !important;
+  fill: var(--gray-500) !important;
+}
+
+.recharts-tooltip-wrapper {
+  outline: none;
+}
+
+/* ========================================
+   CLASES DE UTILIDAD
+   ======================================== */
+
+.bg-white-soft {
+  background-color: var(--surface-gray-50);
+}
+
+.bg-white-pure {
+  background-color: var(--surface-white);
+}
+
+.bg-purple {
+  background-color: var(--primary-purple);
+}
+
+.text-purple {
+  color: var(--primary-purple);
+}
+
+.border-purple {
+  border-color: var(--primary-purple);
+}
+
+.text-gray-muted {
+  color: var(--gray-500);
+}
+
+/* ========================================
+   UTILIDADES DE ESPACIADO
+   ======================================== */
+
+.section-padding {
+  padding: 32px;
+}
+
+.panel-padding {
+  padding: 24px;
+}
+
+@media (max-width: 1024px) {
+  .section-padding {
+    padding: 24px;
+  }
+}
+
+@media (max-width: 640px) {
+  .section-padding {
+    padding: 16px;
+  }
+}
+
+/* ========================================
+   HEADER MEJORADO - ESTILOS ADICIONALES
+   ======================================== */
+
+/* Breadcrumb mejorado */
+header nav a,
+header nav span {
+  transition: color 0.2s ease;
+}
+
+/* Título de página animado */
+header h1 {
+  background: linear-gradient(135deg, #111827 0%, #4b5563 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Buscador con efecto focus */
+header input[type="text"] {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+header input[type="text"]:focus {
+  box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.15);
+}
+
+/* Indicador de teclado */
+header kbd {
+  font-family: "Plus Jakarta Sans", monospace;
+  letter-spacing: 0.05em;
+}
+
+/* Botón de notificaciones con badge */
+header button:has(+ span.absolute) {
+  position: relative;
+}
+
+header button .absolute {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.8;
+    transform: scale(1.1);
+  }
+}
+
+/* Barra de información rápida */
+header .bg-gray-50 {
+  backdrop-filter: blur(8px);
+}
+
+/* Indicador de estado del sistema */
+header .w-2.h-2.bg-green-500 {
+  box-shadow: 0 0 0 2px rgba(34, 197, 94, 0.3);
+}
+
+/* Responsive del header */
+@media (max-width: 768px) {
+  header .flex-1.min-w-0 {
+    min-width: auto;
+  }
+
+  header h1 {
+    font-size: 1.125rem;
+  }
+
+  header nav {
+    display: none;
+  }
+}
+
+/* Hover effects */
+header button {
+  transition: all 0.2s ease;
+}
+
+header button:active {
+  transform: scale(0.95);
+}
+
+/* Sticky header shadow on scroll */
+header.sticky {
+  transition: box-shadow 0.3s ease;
+}
+
+header.sticky.scrolled {
+  box-shadow:
+    0 4px 6px -1px rgba(0, 0, 0, 0.1),
+    0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
