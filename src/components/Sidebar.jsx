@@ -12,6 +12,7 @@ import {
   ChevronRight,
 } from "lucide-react";
 import "../styles/sidebar.css";
+import { useBrandConfig } from "../hooks/useBrandConfig";
 
 const menuItems = [
   { icon: LayoutDashboard, label: "Dashboard", id: "dashboard" },
@@ -24,6 +25,7 @@ const menuItems = [
 
 export default function Sidebar({ onNavigate, currentPage }) {
   const [isOpen, setIsOpen] = useState(false);
+  const { config: brandConfig } = useBrandConfig();
 
   const handleItemClick = (id) => {
     onNavigate(id);
@@ -60,8 +62,8 @@ export default function Sidebar({ onNavigate, currentPage }) {
                 <Palette className="text-white" size={26} strokeWidth={2} />
               </div>
               <div className="sidebar-logo-text">
-                <h1>RótulosPro</h1>
-                <p>Panel de Control</p>
+                <h1>{brandConfig.companyName}</h1>
+                <p>{brandConfig.tagline}</p>
               </div>
             </div>
           </div>

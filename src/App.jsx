@@ -28,6 +28,7 @@ import SettingsPage from "./pages/SettingsPage";
 import "./styles/sidebar.css";
 import "./styles/header.css";
 import "./components/Dashboard.css";
+import { useBrandConfig } from "./hooks/useBrandConfig";
 
 const stats = [
   {
@@ -70,6 +71,8 @@ const stats = [
 
 // Dashboard Component
 function Dashboard({ mounted }) {
+  const { config: brandConfig } = useBrandConfig();
+
   return (
     <div className="space-y-8">
       {/* Welcome Section */}
@@ -80,11 +83,28 @@ function Dashboard({ mounted }) {
           <div>
             <p className="text-base text-gray-500 mb-2">Bienvenido de vuelta</p>
             <h2 className="text-3xl font-bold text-gray-900">
-              Dashboard<span className="text-purple-600">.</span>
+              Dashboard
+              <span
+                style={{
+                  color: brandConfig.useCustomColor
+                    ? brandConfig.customPrimaryColor
+                    : "var(--color-primary)",
+                }}
+              >
+                .
+              </span>
             </h2>
           </div>
 
-          <button className="flex items-center gap-2 px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white rounded-xl font-medium transition-all shadow-lg shadow-purple-200 hover:shadow-xl hover:shadow-purple-200">
+          <button
+            className="flex items-center gap-2 px-6 py-3 text-white rounded-xl font-medium transition-all shadow-lg hover:shadow-xl"
+            style={{
+              backgroundColor: brandConfig.useCustomColor
+                ? brandConfig.customPrimaryColor
+                : "var(--color-primary)",
+              boxShadow: `0 10px 15px -3px ${brandConfig.useCustomColor ? brandConfig.customPrimaryColor : "var(--color-primary)"}33`,
+            }}
+          >
             <Plus size={20} />
             Nuevo Pedido
           </button>
@@ -124,7 +144,7 @@ function Dashboard({ mounted }) {
       <footer className="border-t border-gray-200 pt-8 mt-8">
         <div className="flex flex-col md:flex-row items-center justify-between gap-6">
           <div className="text-sm text-gray-500">
-            © 2026 Rótulos Pro. Todos los derechos reservados.
+            © 2026 {brandConfig.companyName}. Todos los derechos reservados.
           </div>
           <div className="flex items-center gap-8">
             <a
@@ -157,6 +177,11 @@ function App() {
   const [currentPage, setCurrentPage] = useState("dashboard");
   const [selectedOrderId, setSelectedOrderId] = useState(null);
   const [currentTime, setCurrentTime] = useState(new Date());
+
+  // Detectar si estamos en modo standalone (editor en nueva pestaña)
+  const isStandalone =
+    window.location.search.includes("standalone=true") ||
+    window.location.pathname === "/editor";
 
   useEffect(() => {
     setMounted(true);
@@ -213,6 +238,15 @@ function App() {
   };
 
   const pageInfo = getPageTitle();
+
+  // Si estamos en modo standalone, mostrar solo el editor
+  if (isStandalone) {
+    return (
+      <div className="min-h-screen bg-gray-100">
+        <EditorPage standalone={true} />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-100 flex">
@@ -278,10 +312,7 @@ function App() {
                     <div className="user-avatar">
                       <User size={18} strokeWidth={2} />
                     </div>
-                    <ChevronRight
-                      size={16}
-                      className="user-dropdown-icon"
-                    />
+                    <ChevronRight size={16} className="user-dropdown-icon" />
                   </button>
                 </div>
               </div>

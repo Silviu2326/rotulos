@@ -34,58 +34,20 @@ import {
   Phone,
   MapPin,
   ChevronRight,
+  FormInput,
+  Plus,
+  Trash2,
+  GripVertical,
+  Hash,
+  List,
+  CheckSquare,
+  CircleDot,
+  Calendar,
+  Link,
+  AlignLeft,
 } from "lucide-react";
-
-const COLOR_THEMES = {
-  purple: {
-    name: "Púrpura",
-    primary: "#7C3AED",
-    secondary: "#A78BFA",
-    accent: "#5B21B6",
-  },
-  blue: {
-    name: "Azul",
-    primary: "#3B82F6",
-    secondary: "#60A5FA",
-    accent: "#1D4ED8",
-  },
-  green: {
-    name: "Verde",
-    primary: "#10B981",
-    secondary: "#34D399",
-    accent: "#059669",
-  },
-  orange: {
-    name: "Naranja",
-    primary: "#F97316",
-    secondary: "#FB923C",
-    accent: "#EA580C",
-  },
-  red: {
-    name: "Rojo",
-    primary: "#EF4444",
-    secondary: "#F87171",
-    accent: "#DC2626",
-  },
-  pink: {
-    name: "Rosa",
-    primary: "#EC4899",
-    secondary: "#F472B6",
-    accent: "#DB2777",
-  },
-  teal: {
-    name: "Turquesa",
-    primary: "#14B8A6",
-    secondary: "#2DD4BF",
-    accent: "#0D9488",
-  },
-  indigo: {
-    name: "Índigo",
-    primary: "#6366F1",
-    secondary: "#818CF8",
-    accent: "#4F46E5",
-  },
-};
+import { useEditorConfig } from "../hooks/useEditorConfig";
+import { useBrandConfig } from "../hooks/useBrandConfig";
 
 const EDITOR_MODES = [
   {
@@ -133,38 +95,41 @@ export default function SettingsPage() {
   const [isSaving, setIsSaving] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
 
-  // Configuración de Marca
-  const [brandConfig, setBrandConfig] = useState({
-    companyName: "Rótulos Pro",
-    tagline: "Tu imagen, nuestra pasión",
-    logo: null,
-    favicon: null,
-    primaryColor: "purple",
-    customPrimaryColor: "#7C3AED",
-    enableWhiteLabel: true,
-    hidePoweredBy: false,
-    customDomain: "",
-  });
+  // Hook de configuración del editor
+  const {
+    config: editorConfig,
+    updateConfig: updateEditorConfig,
+    addCustomField,
+    updateCustomField,
+    removeCustomField,
+    resetConfig: resetEditorConfig,
+    getCustomFields,
+    FIELD_TYPES,
+  } = useEditorConfig();
 
-  // Configuración del Editor
-  const [editorConfig, setEditorConfig] = useState({
-    mode: "wizard",
-    steps: {
-      type: { enabled: true, required: true },
-      dimensions: { enabled: true, required: true },
-      material: { enabled: true, required: true },
-      design: { enabled: true, required: true },
-      colors: { enabled: true, required: true },
-      extras: { enabled: true, required: false },
-    },
-    showPricePreview: true,
-    showStockWarnings: true,
-    enableImageUpload: true,
-    maxUploadSize: 10,
-    allowedFormats: ["jpg", "png", "svg", "pdf"],
-    showTemplates: true,
-    enableSaveDraft: true,
+  // Estados para campos personalizados
+  const [editingField, setEditingField] = useState(null);
+  const [showFieldForm, setShowFieldForm] = useState(false);
+  const [newField, setNewField] = useState({
+    name: "",
+    label: "",
+    type: "text",
+    required: false,
+    placeholder: "",
+    options: [],
+    helpText: "",
+    showInSummary: true,
+    showInPreview: false,
   });
+  const [newOption, setNewOption] = useState("");
+
+  // Hook de configuración de Marca
+  const {
+    config: brandConfig,
+    updateConfig: updateBrandConfig,
+    resetConfig: reupdateBrandConfig,
+    COLOR_THEMES,
+  } = useBrandConfig();
 
   // Configuración de Apariencia
   const [appearanceConfig, setAppearanceConfig] = useState({
@@ -270,6 +235,7 @@ export default function SettingsPage() {
         "¿Estás seguro de que quieres restablecer todas las configuraciones a los valores por defecto?",
       )
     ) {
+      resetEditorConfig();
       window.location.reload();
     }
   };
@@ -277,6 +243,7 @@ export default function SettingsPage() {
   const tabs = [
     { id: "brand", name: "Marca", icon: Palette },
     { id: "editor", name: "Editor", icon: Layout },
+    { id: "custom-fields", name: "Campos", icon: FormInput },
     { id: "appearance", name: "Apariencia", icon: Type },
     { id: "general", name: "General", icon: Settings },
     { id: "pricing", name: "Precios", icon: Percent },
@@ -355,22 +322,22 @@ export default function SettingsPage() {
               <h3>Personalización de Marca</h3>
 
               <div className="settings-card">
-                <h4>Información de la Empresa</h4>
+                <h4>Información Básica</h4>
 
                 <div className="form-row">
                   <div className="form-group">
-                    <label>Nombre de la Empresa *</label>
+                    <label>Nombre de la Empresa</label>
                     <input
                       type="text"
                       value={brandConfig.companyName}
                       onChange={(e) =>
-                        setBrandConfig({
-                          ...brandConfig,
-                          companyName: e.target.value,
-                        })
+                        updateBrandConfig({ companyName: e.target.value })
                       }
                       placeholder="Rótulos Pro"
                     />
+                    <small>
+                      Este nombre aparecerá en el sidebar y el footer
+                    </small>
                   </div>
                   <div className="form-group">
                     <label>Slogan / Tagline</label>
@@ -378,44 +345,11 @@ export default function SettingsPage() {
                       type="text"
                       value={brandConfig.tagline}
                       onChange={(e) =>
-                        setBrandConfig({
-                          ...brandConfig,
-                          tagline: e.target.value,
-                        })
+                        updateBrandConfig({ tagline: e.target.value })
                       }
                       placeholder="Tu imagen, nuestra pasión"
                     />
-                  </div>
-                </div>
-
-                <div className="form-row">
-                  <div className="form-group">
-                    <label>Logo Principal</label>
-                    <div className="image-upload-large">
-                      {brandConfig.logo ? (
-                        <img src={brandConfig.logo} alt="Logo" />
-                      ) : (
-                        <div className="upload-placeholder">
-                          <Upload size={32} />
-                          <span>
-                            Arrastra tu logo aquí o haz clic para subir
-                          </span>
-                          <small>SVG, PNG o JPG. Máximo 2MB.</small>
-                        </div>
-                      )}
-                      <input type="file" accept="image/*" />
-                    </div>
-                  </div>
-                  <div className="form-group">
-                    <label>Favicon</label>
-                    <div className="image-upload-small">
-                      {brandConfig.favicon ? (
-                        <img src={brandConfig.favicon} alt="Favicon" />
-                      ) : (
-                        <ImageIcon size={24} />
-                      )}
-                      <input type="file" accept="image/*" />
-                    </div>
+                    <small>Aparece debajo del nombre en el sidebar</small>
                   </div>
                 </div>
               </div>
@@ -431,16 +365,20 @@ export default function SettingsPage() {
                         key={key}
                         className={`color-theme ${brandConfig.primaryColor === key ? "selected" : ""}`}
                         onClick={() =>
-                          setBrandConfig({ ...brandConfig, primaryColor: key })
+                          updateBrandConfig({
+                            primaryColor: key,
+                            useCustomColor: false,
+                          })
                         }
                       >
                         <div
                           className="theme-preview"
                           style={{ background: theme.primary }}
                         >
-                          {brandConfig.primaryColor === key && (
-                            <Check size={16} color="white" />
-                          )}
+                          {brandConfig.primaryColor === key &&
+                            !brandConfig.useCustomColor && (
+                              <Check size={16} color="white" />
+                            )}
                         </div>
                         <span>{theme.name}</span>
                       </button>
@@ -450,15 +388,15 @@ export default function SettingsPage() {
 
                 <div className="form-row">
                   <div className="form-group">
-                    <label>Color Primario Personalizado</label>
+                    <label>Color Personalizado</label>
                     <div className="color-picker">
                       <input
                         type="color"
                         value={brandConfig.customPrimaryColor}
                         onChange={(e) =>
-                          setBrandConfig({
-                            ...brandConfig,
+                          updateBrandConfig({
                             customPrimaryColor: e.target.value,
+                            useCustomColor: true,
                           })
                         }
                       />
@@ -466,86 +404,33 @@ export default function SettingsPage() {
                         type="text"
                         value={brandConfig.customPrimaryColor}
                         onChange={(e) =>
-                          setBrandConfig({
-                            ...brandConfig,
+                          updateBrandConfig({
                             customPrimaryColor: e.target.value,
+                            useCustomColor: true,
                           })
                         }
+                        placeholder="#7C3AED"
                       />
                     </div>
+                    <small>
+                      Selecciona un color para personalizar la marca
+                    </small>
                   </div>
                 </div>
-              </div>
 
-              <div className="settings-card">
-                <h4>Opciones de Marca Blanca</h4>
-
-                <div className="toggle-group">
-                  <label className="toggle-item">
-                    <div className="toggle-info">
-                      <span className="toggle-label">Modo Marca Blanca</span>
-                      <span className="toggle-description">
-                        Oculta todas las referencias a "Rótulos Pro"
-                      </span>
-                    </div>
-                    <button
-                      className={`toggle-switch ${brandConfig.enableWhiteLabel ? "active" : ""}`}
-                      onClick={() =>
-                        setBrandConfig({
-                          ...brandConfig,
-                          enableWhiteLabel: !brandConfig.enableWhiteLabel,
-                        })
-                      }
-                    >
-                      {brandConfig.enableWhiteLabel ? (
-                        <ToggleRight size={24} />
-                      ) : (
-                        <ToggleLeft size={24} />
-                      )}
-                    </button>
-                  </label>
-
-                  <label className="toggle-item">
-                    <div className="toggle-info">
-                      <span className="toggle-label">Ocultar "Powered By"</span>
-                      <span className="toggle-description">
-                        Elimina el pie de página con créditos
-                      </span>
-                    </div>
-                    <button
-                      className={`toggle-switch ${brandConfig.hidePoweredBy ? "active" : ""}`}
-                      onClick={() =>
-                        setBrandConfig({
-                          ...brandConfig,
-                          hidePoweredBy: !brandConfig.hidePoweredBy,
-                        })
-                      }
-                    >
-                      {brandConfig.hidePoweredBy ? (
-                        <ToggleRight size={24} />
-                      ) : (
-                        <ToggleLeft size={24} />
-                      )}
-                    </button>
-                  </label>
-                </div>
-
-                <div className="form-group">
-                  <label>Dominio Personalizado</label>
-                  <input
-                    type="text"
-                    value={brandConfig.customDomain}
-                    onChange={(e) =>
-                      setBrandConfig({
-                        ...brandConfig,
-                        customDomain: e.target.value,
-                      })
-                    }
-                    placeholder="rotulos.tuempresa.com"
-                  />
-                  <small>
-                    Requiere configuración DNS. Contacta con soporte.
-                  </small>
+                <div className="color-preview">
+                  <div
+                    className="preview-box"
+                    style={{
+                      backgroundColor: brandConfig.useCustomColor
+                        ? brandConfig.customPrimaryColor
+                        : COLOR_THEMES[brandConfig.primaryColor]?.primary,
+                    }}
+                  >
+                    <span style={{ color: "white" }}>
+                      {brandConfig.companyName}
+                    </span>
+                  </div>
                 </div>
               </div>
             </div>
@@ -569,9 +454,7 @@ export default function SettingsPage() {
                       <button
                         key={mode.id}
                         className={`editor-mode ${editorConfig.mode === mode.id ? "selected" : ""}`}
-                        onClick={() =>
-                          setEditorConfig({ ...editorConfig, mode: mode.id })
-                        }
+                        onClick={() => updateEditorConfig({ mode: mode.id })}
                       >
                         <Icon size={32} />
                         <h5>{mode.name}</h5>
@@ -617,8 +500,7 @@ export default function SettingsPage() {
                                 type="checkbox"
                                 checked={step.enabled}
                                 onChange={(e) =>
-                                  setEditorConfig({
-                                    ...editorConfig,
+                                  updateEditorConfig({
                                     steps: {
                                       ...editorConfig.steps,
                                       [stepKey]: {
@@ -637,8 +519,7 @@ export default function SettingsPage() {
                                 checked={step.required}
                                 disabled={!step.enabled}
                                 onChange={(e) =>
-                                  setEditorConfig({
-                                    ...editorConfig,
+                                  updateEditorConfig({
                                     steps: {
                                       ...editorConfig.steps,
                                       [stepKey]: {
@@ -673,8 +554,7 @@ export default function SettingsPage() {
                     <button
                       className={`toggle-switch ${editorConfig.showPricePreview ? "active" : ""}`}
                       onClick={() =>
-                        setEditorConfig({
-                          ...editorConfig,
+                        updateEditorConfig({
                           showPricePreview: !editorConfig.showPricePreview,
                         })
                       }
@@ -697,8 +577,7 @@ export default function SettingsPage() {
                     <button
                       className={`toggle-switch ${editorConfig.showStockWarnings ? "active" : ""}`}
                       onClick={() =>
-                        setEditorConfig({
-                          ...editorConfig,
+                        updateEditorConfig({
                           showStockWarnings: !editorConfig.showStockWarnings,
                         })
                       }
@@ -721,8 +600,7 @@ export default function SettingsPage() {
                     <button
                       className={`toggle-switch ${editorConfig.enableImageUpload ? "active" : ""}`}
                       onClick={() =>
-                        setEditorConfig({
-                          ...editorConfig,
+                        updateEditorConfig({
                           enableImageUpload: !editorConfig.enableImageUpload,
                         })
                       }
@@ -745,8 +623,7 @@ export default function SettingsPage() {
                     <button
                       className={`toggle-switch ${editorConfig.enableSaveDraft ? "active" : ""}`}
                       onClick={() =>
-                        setEditorConfig({
-                          ...editorConfig,
+                        updateEditorConfig({
                           enableSaveDraft: !editorConfig.enableSaveDraft,
                         })
                       }
@@ -769,8 +646,7 @@ export default function SettingsPage() {
                     <button
                       className={`toggle-switch ${editorConfig.showTemplates ? "active" : ""}`}
                       onClick={() =>
-                        setEditorConfig({
-                          ...editorConfig,
+                        updateEditorConfig({
                           showTemplates: !editorConfig.showTemplates,
                         })
                       }
@@ -795,8 +671,7 @@ export default function SettingsPage() {
                       type="number"
                       value={editorConfig.maxUploadSize}
                       onChange={(e) =>
-                        setEditorConfig({
-                          ...editorConfig,
+                        updateEditorConfig({
                           maxUploadSize: parseInt(e.target.value),
                         })
                       }
@@ -820,8 +695,7 @@ export default function SettingsPage() {
                               : editorConfig.allowedFormats.filter(
                                   (f) => f !== format,
                                 );
-                            setEditorConfig({
-                              ...editorConfig,
+                            updateEditorConfig({
                               allowedFormats: newFormats,
                             });
                           }}
@@ -830,6 +704,432 @@ export default function SettingsPage() {
                       </label>
                     ))}
                   </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* CAMPOS PERSONALIZADOS */}
+          {activeTab === "custom-fields" && (
+            <div className="settings-section">
+              <div className="settings-section-header">
+                <div>
+                  <h3>Campos Personalizados</h3>
+                  <p className="settings-subtitle">
+                    Añade campos adicionales al formulario del editor
+                  </p>
+                </div>
+                <button
+                  className="btn btn-primary"
+                  onClick={() => {
+                    setEditingField(null);
+                    setNewField({
+                      name: "",
+                      label: "",
+                      type: "text",
+                      required: false,
+                      placeholder: "",
+                      options: [],
+                      helpText: "",
+                      showInSummary: true,
+                      showInPreview: false,
+                    });
+                    setShowFieldForm(true);
+                  }}
+                >
+                  <Plus size={18} />
+                  Añadir Campo
+                </button>
+              </div>
+
+              {/* Lista de campos */}
+              <div className="settings-card">
+                <h4>Campos Configurados</h4>
+                {editorConfig.customFields.length === 0 ? (
+                  <div className="empty-state">
+                    <FormInput size={48} className="empty-icon" />
+                    <p>No hay campos personalizados configurados</p>
+                    <small>
+                      Añade campos para recopilar información adicional de tus
+                      clientes
+                    </small>
+                  </div>
+                ) : (
+                  <div className="custom-fields-list">
+                    {getCustomFields().map((field, index) => {
+                      const FieldIcon =
+                        FIELD_TYPES.find((t) => t.id === field.type)?.icon ||
+                        "Type";
+                      const IconComponent =
+                        {
+                          Type,
+                          AlignLeft,
+                          Hash,
+                          List,
+                          CheckSquare,
+                          CircleDot,
+                          Calendar,
+                          Mail,
+                          Phone,
+                          Link,
+                          Palette,
+                        }[FieldIcon] || Type;
+
+                      return (
+                        <div key={field.id} className="custom-field-item">
+                          <div className="field-drag-handle">
+                            <GripVertical size={18} />
+                          </div>
+                          <div className="field-info">
+                            <div className="field-header">
+                              <IconComponent size={18} />
+                              <span className="field-label">{field.label}</span>
+                              {field.required && (
+                                <span className="field-required">*</span>
+                              )}
+                            </div>
+                            <div className="field-meta">
+                              <span className="field-type">
+                                {
+                                  FIELD_TYPES.find((t) => t.id === field.type)
+                                    ?.name
+                                }
+                              </span>
+                              <span className="field-name">{field.name}</span>
+                            </div>
+                          </div>
+                          <div className="field-actions">
+                            <button
+                              className="btn-icon"
+                              onClick={() => {
+                                setEditingField(field);
+                                setNewField({ ...field });
+                                setShowFieldForm(true);
+                              }}
+                              title="Editar"
+                            >
+                              <Sliders size={16} />
+                            </button>
+                            <button
+                              className="btn-icon btn-icon-danger"
+                              onClick={() => {
+                                if (
+                                  window.confirm(
+                                    `¿Eliminar el campo "${field.label}"?`,
+                                  )
+                                ) {
+                                  removeCustomField(field.id);
+                                }
+                              }}
+                              title="Eliminar"
+                            >
+                              <Trash2 size={16} />
+                            </button>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+
+              {/* Formulario de campo */}
+              {showFieldForm && (
+                <div className="settings-card field-form-card">
+                  <h4>{editingField ? "Editar Campo" : "Nuevo Campo"}</h4>
+
+                  <div className="form-row">
+                    <div className="form-group">
+                      <label>Nombre del Campo (ID) *</label>
+                      <input
+                        type="text"
+                        value={newField.name}
+                        onChange={(e) =>
+                          setNewField({
+                            ...newField,
+                            name: e.target.value
+                              .toLowerCase()
+                              .replace(/\s+/g, "_")
+                              .replace(/[^a-z0-9_]/g, ""),
+                          })
+                        }
+                        placeholder="ej: nombre_cliente"
+                      />
+                      <small>
+                        Identificador único, solo letras, números y guiones
+                        bajos
+                      </small>
+                    </div>
+                    <div className="form-group">
+                      <label>Etiqueta *</label>
+                      <input
+                        type="text"
+                        value={newField.label}
+                        onChange={(e) =>
+                          setNewField({ ...newField, label: e.target.value })
+                        }
+                        placeholder="ej: Nombre del Cliente"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="form-row">
+                    <div className="form-group">
+                      <label>Tipo de Campo *</label>
+                      <select
+                        value={newField.type}
+                        onChange={(e) =>
+                          setNewField({
+                            ...newField,
+                            type: e.target.value,
+                            options:
+                              e.target.value === "select" ||
+                              e.target.value === "radio"
+                                ? newField.options
+                                : [],
+                          })
+                        }
+                      >
+                        {FIELD_TYPES.map((type) => (
+                          <option key={type.id} value={type.id}>
+                            {type.name}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                    <div className="form-group">
+                      <label>Placeholder</label>
+                      <input
+                        type="text"
+                        value={newField.placeholder}
+                        onChange={(e) =>
+                          setNewField({
+                            ...newField,
+                            placeholder: e.target.value,
+                          })
+                        }
+                        placeholder="Texto de ayuda"
+                      />
+                    </div>
+                  </div>
+
+                  {(newField.type === "select" ||
+                    newField.type === "radio") && (
+                    <div className="form-group">
+                      <label>Opciones</label>
+                      <div className="options-input">
+                        <input
+                          type="text"
+                          value={newOption}
+                          onChange={(e) => setNewOption(e.target.value)}
+                          placeholder="Añadir opción..."
+                          onKeyPress={(e) => {
+                            if (e.key === "Enter" && newOption.trim()) {
+                              setNewField({
+                                ...newField,
+                                options: [
+                                  ...newField.options,
+                                  newOption.trim(),
+                                ],
+                              });
+                              setNewOption("");
+                            }
+                          }}
+                        />
+                        <button
+                          className="btn btn-secondary"
+                          onClick={() => {
+                            if (newOption.trim()) {
+                              setNewField({
+                                ...newField,
+                                options: [
+                                  ...newField.options,
+                                  newOption.trim(),
+                                ],
+                              });
+                              setNewOption("");
+                            }
+                          }}
+                        >
+                          <Plus size={16} />
+                        </button>
+                      </div>
+                      <div className="options-list">
+                        {newField.options.map((option, idx) => (
+                          <span key={idx} className="option-tag">
+                            {option}
+                            <button
+                              onClick={() =>
+                                setNewField({
+                                  ...newField,
+                                  options: newField.options.filter(
+                                    (_, i) => i !== idx,
+                                  ),
+                                })
+                              }
+                            >
+                              ×
+                            </button>
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="form-group">
+                    <label>Texto de Ayuda</label>
+                    <input
+                      type="text"
+                      value={newField.helpText}
+                      onChange={(e) =>
+                        setNewField({ ...newField, helpText: e.target.value })
+                      }
+                      placeholder="Información adicional para el usuario"
+                    />
+                  </div>
+
+                  <div className="toggle-group">
+                    <label className="toggle-item">
+                      <div className="toggle-info">
+                        <span className="toggle-label">Campo Obligatorio</span>
+                        <span className="toggle-description">
+                          El usuario debe completar este campo
+                        </span>
+                      </div>
+                      <button
+                        className={`toggle-switch ${newField.required ? "active" : ""}`}
+                        onClick={() =>
+                          setNewField({
+                            ...newField,
+                            required: !newField.required,
+                          })
+                        }
+                      >
+                        {newField.required ? (
+                          <ToggleRight size={24} />
+                        ) : (
+                          <ToggleLeft size={24} />
+                        )}
+                      </button>
+                    </label>
+
+                    <label className="toggle-item">
+                      <div className="toggle-info">
+                        <span className="toggle-label">Mostrar en Resumen</span>
+                        <span className="toggle-description">
+                          Incluir en la página de resumen del pedido
+                        </span>
+                      </div>
+                      <button
+                        className={`toggle-switch ${newField.showInSummary ? "active" : ""}`}
+                        onClick={() =>
+                          setNewField({
+                            ...newField,
+                            showInSummary: !newField.showInSummary,
+                          })
+                        }
+                      >
+                        {newField.showInSummary ? (
+                          <ToggleRight size={24} />
+                        ) : (
+                          <ToggleLeft size={24} />
+                        )}
+                      </button>
+                    </label>
+
+                    <label className="toggle-item">
+                      <div className="toggle-info">
+                        <span className="toggle-label">Mostrar en Preview</span>
+                        <span className="toggle-description">
+                          Incluir en la vista previa del rótulo
+                        </span>
+                      </div>
+                      <button
+                        className={`toggle-switch ${newField.showInPreview ? "active" : ""}`}
+                        onClick={() =>
+                          setNewField({
+                            ...newField,
+                            showInPreview: !newField.showInPreview,
+                          })
+                        }
+                      >
+                        {newField.showInPreview ? (
+                          <ToggleRight size={24} />
+                        ) : (
+                          <ToggleLeft size={24} />
+                        )}
+                      </button>
+                    </label>
+                  </div>
+
+                  <div className="form-actions">
+                    <button
+                      className="btn btn-secondary"
+                      onClick={() => {
+                        setShowFieldForm(false);
+                        setEditingField(null);
+                      }}
+                    >
+                      Cancelar
+                    </button>
+                    <button
+                      className="btn btn-primary"
+                      onClick={() => {
+                        if (!newField.name || !newField.label) {
+                          alert("Por favor completa el nombre y la etiqueta");
+                          return;
+                        }
+                        if (editingField) {
+                          updateCustomField(editingField.id, newField);
+                        } else {
+                          addCustomField(newField);
+                        }
+                        setShowFieldForm(false);
+                        setEditingField(null);
+                      }}
+                      disabled={!newField.name || !newField.label}
+                    >
+                      <Save size={18} />
+                      {editingField ? "Guardar Cambios" : "Crear Campo"}
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* Información */}
+              <div className="settings-info-box">
+                <AlertCircle size={20} />
+                <div>
+                  <h5>Tipos de Campos Disponibles</h5>
+                  <ul>
+                    <li>
+                      <strong>Texto:</strong> Campo de texto simple
+                    </li>
+                    <li>
+                      <strong>Texto Largo:</strong> Área de texto multilínea
+                    </li>
+                    <li>
+                      <strong>Número:</strong> Valores numéricos
+                    </li>
+                    <li>
+                      <strong>Selección:</strong> Dropdown con opciones
+                    </li>
+                    <li>
+                      <strong>Checkbox:</strong> Casilla de verificación
+                    </li>
+                    <li>
+                      <strong>Opciones:</strong> Botones de radio
+                    </li>
+                    <li>
+                      <strong>Fecha:</strong> Selector de fecha
+                    </li>
+                    <li>
+                      <strong>Email/Teléfono/URL:</strong> Validación incluida
+                    </li>
+                    <li>
+                      <strong>Color:</strong> Selector de color
+                    </li>
+                  </ul>
                 </div>
               </div>
             </div>
