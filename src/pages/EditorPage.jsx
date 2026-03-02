@@ -24,6 +24,166 @@ import {
   X,
 } from "lucide-react";
 import { useEditorConfig } from "../hooks/useEditorConfig";
+import "../styles/rotularte.css";
+
+// Componente para el ColorPicker/ThemeSelector
+const ColorPicker = ({ currentTheme, setTheme, currentColor, setColor }) => {
+  const [isOpen, setIsOpen] = useState(false);
+
+  const colors = [
+    { color: "#ff6b00", name: "Naranja Neón" },
+    { color: "#00ff88", name: "Verde Neón" },
+    { color: "#00d4ff", name: "Cian Neón" },
+    { color: "#ff006e", name: "Rosa Neón" },
+    { color: "#fb5607", name: "Coral" },
+    { color: "#8338ec", name: "Púrpura" },
+    { color: "#ffbe0b", name: "Amarillo" },
+    { color: "#3a86ff", name: "Azul" },
+  ];
+
+  const themes = [
+    {
+      id: "industrial",
+      name: "Industrial",
+      desc: "⚡ Grid técnico visible / Monospace / Workshop oscuro",
+      bg: "#0a0a0a",
+      accent: "#ff6b00",
+    },
+    {
+      id: "minimal",
+      name: "Minimal",
+      desc: "✨ Ultra aireado / Playfair Display / Sombras etéreas",
+      bg: "#fafafa",
+      accent: "#2d2d2d",
+    },
+    {
+      id: "brutalist",
+      name: "Brutalista",
+      desc: "⚫ Negro absoluto / Bordes 3px / Sin redondeos",
+      bg: "#000000",
+      accent: "#ffffff",
+    },
+    {
+      id: "vaporwave",
+      name: "Vaporwave",
+      desc: "🌆 Chrome & Gradientes / 3D Perspective / Glassmorphism",
+      bg: "#0c0518",
+      accent: "#ff71ce",
+    },
+    {
+      id: "cyberpunk",
+      name: "Cyberpunk",
+      desc: "⚡ Futurista / Glitch effects / Neon glow",
+      bg: "#050810",
+      accent: "#00ff9f",
+    },
+  ];
+
+  return (
+    <>
+      <button
+        className="color-picker-toggle"
+        onClick={() => setIsOpen(!isOpen)}
+        aria-label="Cambiar colores"
+      >
+        <svg viewBox="0 0 24 24" width="28" height="28" fill="currentColor">
+          <path d="M12 3c-4.97 0-9 4.03-9 9s4.03 9 9 9c.83 0 1.5-.67 1.5-1.5 0-.39-.15-.74-.39-1.01-.23-.26-.38-.61-.38-.99 0-.83.67-1.5 1.5-1.5H16c2.76 0 5-2.24 5-5 0-4.42-4.03-8-9-8zm-5.5 9c-.83 0-1.5-.67-1.5-1.5S5.67 9 6.5 9 8 9.67 8 10.5 7.33 12 6.5 12zm3-4C8.67 8 8 7.33 8 6.5S8.67 5 9.5 5s1.5.67 1.5 1.5S10.33 8 9.5 8zm5 0c-.83 0-1.5-.67-1.5-1.5S13.67 5 14.5 5s1.5.67 1.5 1.5S15.33 8 14.5 8zm3 4c-.83 0-1.5-.67-1.5-1.5S16.67 9 17.5 9s1.5.67 1.5 1.5-.67 1.5-1.5 1.5z" />
+        </svg>
+      </button>
+
+      <div className={`color-picker-panel ${isOpen ? "active" : ""}`}>
+        <div className="color-picker-header">
+          <span>Personalizar</span>
+          <button
+            className="color-picker-close"
+            onClick={() => setIsOpen(false)}
+          >
+            ×
+          </button>
+        </div>
+
+        <div className="color-presets">
+          {colors.map((c) => (
+            <button
+              key={c.color}
+              className={`color-preset ${currentColor === c.color ? "active" : ""}`}
+              style={{ background: c.color }}
+              onClick={() => setColor(c.color)}
+              title={c.name}
+            />
+          ))}
+        </div>
+
+        <div className="custom-color-section">
+          <label className="custom-color-label">Color Personalizado</label>
+          <div className="color-input-wrapper">
+            <input
+              type="color"
+              className="color-input"
+              value={currentColor}
+              onChange={(e) => setColor(e.target.value)}
+            />
+            <input
+              type="text"
+              className="color-hex-input"
+              value={currentColor.toUpperCase()}
+              onChange={(e) => setColor(e.target.value)}
+              maxLength={7}
+            />
+          </div>
+        </div>
+
+        <div className="theme-section">
+          <label className="theme-label">Estilo Visual</label>
+          <div className="theme-options">
+            {themes.map((t) => (
+              <button
+                key={t.id}
+                className={`theme-btn ${currentTheme === t.id ? "active" : ""}`}
+                onClick={() => setTheme(t.id)}
+              >
+                <div
+                  className="theme-preview"
+                  style={{
+                    background: t.bg,
+                    border: `2px solid ${t.id === "minimal" ? "#e5e5e5" : "#333"}`,
+                    borderRadius:
+                      t.id === "vaporwave" || t.id === "minimal" ? "8px" : "0",
+                  }}
+                >
+                  <span
+                    className="t-bg"
+                    style={{
+                      color: t.id === "minimal" ? "#999" : "#666",
+                      fontSize: "0.5rem",
+                    }}
+                  >
+                    BG
+                  </span>
+                  <span
+                    className="t-accent"
+                    style={{
+                      color: t.accent,
+                      fontSize: "0.6rem",
+                      textShadow:
+                        t.id === "vaporwave" ? "2px 2px #01cdfe" : "none",
+                    }}
+                  >
+                    A
+                  </span>
+                </div>
+                <div className="theme-info">
+                  <span className="theme-name">{t.name}</span>
+                  <span className="theme-desc">{t.desc}</span>
+                </div>
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+    </>
+  );
+};
 
 // Definición completa de todos los pasos posibles
 const ALL_STEPS = {
@@ -163,6 +323,12 @@ export default function EditorPage({ standalone = false }) {
   const [currentStep, setCurrentStep] = useState(0);
   const [activeTab, setActiveTab] = useState("type");
   const [showPreview, setShowPreview] = useState(false);
+  const [theme, setTheme] = useState(
+    () => localStorage.getItem("rotularte-theme") || "industrial",
+  );
+  const [neonColor, setNeonColor] = useState(
+    () => localStorage.getItem("rotularte-color") || "#ff6b00",
+  );
 
   const [formData, setFormData] = useState({
     tipo: "",
@@ -195,6 +361,74 @@ export default function EditorPage({ standalone = false }) {
       });
     }
   }, [config.customFields]);
+
+  // Aplicar tema y color
+  useEffect(() => {
+    document.body.setAttribute("data-theme", theme);
+    document.documentElement.style.setProperty("--color-neon", neonColor);
+    document.documentElement.style.setProperty("--color-neon-glow", neonColor);
+
+    // Forzar todos los colores según el tema seleccionado
+    const themeConfig = {
+      industrial: {
+        bg: "#0a0a0a",
+        bgAlt: "#111111",
+        accent: "#ffffff",
+        text: "#e0e0e0",
+        textMuted: "#666666",
+        metal: "#2a2a2a",
+      },
+      minimal: {
+        bg: "#fafafa",
+        bgAlt: "#ffffff",
+        accent: "#1a1a1a",
+        text: "#333333",
+        textMuted: "#888888",
+        metal: "#e5e5e5",
+      },
+      brutalist: {
+        bg: "#000000",
+        bgAlt: "#000000",
+        accent: "#ffffff",
+        text: "#ffffff",
+        textMuted: "#666666",
+        metal: "#ffffff",
+      },
+      vaporwave: {
+        bg: "#0c0518",
+        bgAlt: "#120824",
+        accent: "#ffffff",
+        text: "#e0e0ff",
+        textMuted: "#8a7a9e",
+        metal: "#1a0f2e",
+      },
+      cyberpunk: {
+        bg: "#050810",
+        bgAlt: "#0a1020",
+        accent: "#ffffff",
+        text: "#a0ffe0",
+        textMuted: "#507060",
+        metal: "#102030",
+      },
+    };
+
+    const config = themeConfig[theme] || themeConfig.industrial;
+
+    // Aplicar todas las variables de color
+    document.documentElement.style.setProperty("--color-bg", config.bg);
+    document.documentElement.style.setProperty("--color-bg-alt", config.bgAlt);
+    document.documentElement.style.setProperty("--color-accent", config.accent);
+    document.documentElement.style.setProperty("--color-text", config.text);
+    document.documentElement.style.setProperty(
+      "--color-text-muted",
+      config.textMuted,
+    );
+    document.documentElement.style.setProperty("--color-metal", config.metal);
+
+    // Guardar preferencias
+    localStorage.setItem("rotularte-theme", theme);
+    localStorage.setItem("rotularte-color", neonColor);
+  }, [theme, neonColor]);
 
   // Obtener pasos activos ordenados según configuración
   const activeSteps = useMemo(() => getActiveSteps(), [getActiveSteps]);
@@ -1490,6 +1724,14 @@ export default function EditorPage({ standalone = false }) {
       >
         {renderEditorMode()}
       </div>
+
+      {/* Color Picker */}
+      <ColorPicker
+        currentTheme={theme}
+        setTheme={setTheme}
+        currentColor={neonColor}
+        setColor={setNeonColor}
+      />
     </div>
   );
 }

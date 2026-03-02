@@ -1,0 +1,1097 @@
+/* ============================================
+   ROTULARTE - CSS Principal (Sin Tailwind)
+   Basado en index.html, editor.html, tienda.html
+   ============================================ */
+
+/* Importar fuentes de Google */
+@import url("https://fonts.googleapis.com/css2?family=Archivo+Black&family=JetBrains+Mono:wght@300;400;600&family=Oswald:wght@400;500;700&family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Space+Grotesk:wght@300;400;500;700&family=Work+Sans:wght@300;400;500;700&family=Bebas+Neue&family=Montserrat:wght@300;400;600;800&family=Rajdhani:wght@400;500;600;700&display=swap");
+
+/* Variables CSS Globales */
+:root {
+  /* Colores base */
+  --color-bg: #0a0a0a;
+  --color-bg-alt: #111111;
+  --color-neon: #ff6b00;
+  --color-neon-glow: #ff9500;
+  --color-accent: #ffffff;
+  --color-text: #e0e0e0;
+  --color-text-muted: #666666;
+  --color-metal: #2a2a2a;
+  --color-secondary: #1a1a1a;
+
+  /* Tipografia */
+  --font-display: "Archivo Black", sans-serif;
+  --font-heading: "Oswald", sans-serif;
+  --font-body: "JetBrains Mono", monospace;
+
+  /* Dimensiones y espaciado */
+  --radius: 0px;
+  --radius-lg: 0px;
+  --border-width: 2px;
+  --section-padding: 8rem;
+  --container-padding: 4rem;
+
+  /* Efectos visuales */
+  --shadow: 0 0 20px rgba(255, 107, 0, 0.2);
+  --shadow-hover: 0 0 40px rgba(255, 107, 0, 0.4);
+  --shadow-card: 0 4px 20px rgba(0, 0, 0, 0.3);
+  --shadow-elevated: 0 20px 60px rgba(0, 0, 0, 0.5);
+  --backdrop-blur: 0px;
+  --backdrop-opacity: 0;
+
+  /* Tipografia detalles */
+  --letter-spacing-display: 2px;
+  --letter-spacing-heading: 2px;
+  --letter-spacing-body: 0px;
+  --line-height-heading: 0.9;
+  --line-height-body: 1.6;
+  --text-transform-heading: uppercase;
+  --font-weight-display: 700;
+  --font-weight-heading: 400;
+  --font-weight-body: 400;
+
+  /* Decoracion de fondo */
+  --grid-opacity: 0.03;
+  --noise-opacity: 0.03;
+  --gradient-angle: 180deg;
+  --gradient-start: transparent;
+  --gradient-end: transparent;
+  --pattern-type: none;
+  --pattern-opacity: 0;
+
+  /* Transiciones */
+  --transition-speed: 0.3s;
+  --transition-bounce: cubic-bezier(0.68, -0.55, 0.265, 1.55);
+
+  /* Elementos especiales */
+  --card-bg: transparent;
+  --card-border: var(--color-metal);
+  --button-radius: 0px;
+  --nav-style: gradient;
+  --hero-layout: split;
+  --neon-effect: flicker;
+  --glow-intensity: 1;
+
+  /* Efectos especiales por tema */
+  --text-shadow: none;
+  --box-shadow-depth: 0;
+  --image-filter: none;
+  --gradient-overlay: none;
+  --pattern-image: none;
+  --animation-speed: 1;
+  --scale-hover: 1.02;
+  --rotate-hover: 0deg;
+  --skew-cards: 0deg;
+  --perspective: 1000px;
+  --glass-effect: 0;
+  --crt-scanline: 0;
+  --chromatic-aberration: 0;
+}
+
+/* Reset y base */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+html,
+body {
+  background-color: var(--color-bg);
+  min-height: 100vh;
+}
+
+body {
+  color: var(--color-text);
+  font-family: var(--font-body);
+  line-height: var(--line-height-body);
+  overflow-x: hidden;
+  transition:
+    background-color 0.5s ease,
+    color 0.5s ease;
+}
+
+/* Textura de ruido */
+body::before {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+  opacity: var(--noise-opacity);
+  pointer-events: none;
+  z-index: 9999;
+}
+
+/* ============================================
+   NAVEGACION
+   ============================================ */
+
+.nav-rotularte {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  padding: 1.5rem 4rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  z-index: 1000;
+  background: linear-gradient(to bottom, var(--color-bg) 0%, transparent 100%);
+  backdrop-filter: blur(var(--backdrop-blur));
+  transition: all var(--transition-speed) ease;
+}
+
+.logo-rotularte {
+  font-family: var(--font-display);
+  font-size: 1.8rem;
+  color: var(--color-accent);
+  text-decoration: none;
+  letter-spacing: var(--letter-spacing-display);
+  position: relative;
+  transition: all var(--transition-speed) ease;
+}
+
+.logo-rotularte::after {
+  content: "";
+  position: absolute;
+  bottom: -4px;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  background: var(--color-neon);
+  box-shadow:
+    0 0 10px var(--color-neon),
+    0 0 20px var(--color-neon);
+  transform: scaleX(0);
+  transform-origin: right;
+  transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.logo-rotularte:hover::after {
+  transform: scaleX(1);
+  transform-origin: left;
+}
+
+.nav-links-rotularte {
+  display: flex;
+  gap: 3rem;
+  list-style: none;
+}
+
+.nav-links-rotularte a {
+  color: var(--color-text);
+  text-decoration: none;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  position: relative;
+  transition: color 0.3s ease;
+}
+
+.nav-links-rotularte a::before {
+  content: "[";
+  position: absolute;
+  left: -12px;
+  opacity: 0;
+  color: var(--color-neon);
+  transition: all 0.3s ease;
+}
+
+.nav-links-rotularte a::after {
+  content: "]";
+  position: absolute;
+  right: -12px;
+  opacity: 0;
+  color: var(--color-neon);
+  transition: all 0.3s ease;
+}
+
+.nav-links-rotularte a:hover {
+  color: var(--color-neon);
+}
+
+.nav-links-rotularte a:hover::before,
+.nav-links-rotularte a:hover::after {
+  opacity: 1;
+}
+
+/* Icono del carrito */
+.cart-icon {
+  position: relative;
+  cursor: pointer;
+  padding: 0.5rem;
+}
+
+.cart-icon svg {
+  width: 24px;
+  height: 24px;
+  fill: var(--color-text);
+  transition: fill 0.3s ease;
+}
+
+.cart-icon:hover svg {
+  fill: var(--color-neon);
+}
+
+.cart-count {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  background: var(--color-neon);
+  color: var(--color-bg);
+  font-size: 0.7rem;
+  font-weight: bold;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ============================================
+   BOTONES
+   ============================================ */
+
+.btn-rotularte {
+  padding: 1rem 2.5rem;
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: var(--letter-spacing-body);
+  text-decoration: none;
+  transition: all var(--transition-speed) ease;
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--radius);
+  cursor: pointer;
+  border: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.btn-primary-rotularte {
+  background: var(--color-neon);
+  color: var(--color-bg);
+  border: var(--border-width) solid var(--color-neon);
+  box-shadow: var(--shadow);
+}
+
+.btn-primary-rotularte:hover {
+  background: transparent;
+  color: var(--color-neon);
+  box-shadow: var(--shadow-hover);
+}
+
+.btn-secondary-rotularte {
+  background: transparent;
+  color: var(--color-accent);
+  border: var(--border-width) solid var(--color-metal);
+}
+
+.btn-secondary-rotularte:hover {
+  border-color: var(--color-neon);
+  color: var(--color-neon);
+}
+
+/* ============================================
+   COLOR PICKER (Selector de temas)
+   ============================================ */
+
+.color-picker-toggle {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  width: 60px;
+  height: 60px;
+  background: var(--color-bg-alt);
+  border: 2px solid var(--color-neon);
+  border-radius: 50%;
+  cursor: pointer;
+  z-index: 99999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  box-shadow: 0 0 20px rgba(255, 107, 0, 0.2);
+}
+
+.color-picker-toggle:hover {
+  transform: scale(1.1);
+  box-shadow: 0 0 30px var(--color-neon);
+}
+
+.color-picker-toggle svg {
+  width: 28px;
+  height: 28px;
+  fill: var(--color-neon);
+}
+
+.color-picker-panel {
+  position: fixed;
+  bottom: 90px;
+  right: 2rem;
+  width: 320px;
+  background: var(--color-bg-alt);
+  border: 2px solid var(--color-metal);
+  padding: 1.5rem;
+  z-index: 100000;
+  transform: translateY(20px);
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s ease;
+  max-height: 70vh;
+  overflow-y: auto;
+}
+
+.color-picker-panel.active {
+  transform: translateY(0);
+  opacity: 1;
+  visibility: visible;
+  border-color: var(--color-neon);
+}
+
+.color-picker-panel::before {
+  content: "";
+  position: absolute;
+  bottom: -10px;
+  right: 20px;
+  width: 20px;
+  height: 20px;
+  background: var(--color-bg-alt);
+  border-right: 2px solid var(--color-neon);
+  border-bottom: 2px solid var(--color-neon);
+  transform: rotate(45deg);
+}
+
+.color-picker-header {
+  font-family: var(--font-heading);
+  font-size: 1.1rem;
+  color: var(--color-accent);
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  margin-bottom: 1.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.color-picker-close {
+  background: none;
+  border: none;
+  color: var(--color-text-muted);
+  font-size: 1.5rem;
+  cursor: pointer;
+  transition: color 0.3s ease;
+  font-family: var(--font-body);
+}
+
+.color-picker-close:hover {
+  color: var(--color-neon);
+}
+
+.color-presets {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+
+.color-preset {
+  width: 100%;
+  aspect-ratio: 1;
+  border: 2px solid transparent;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.color-preset:hover {
+  transform: scale(1.1);
+  border-color: var(--color-accent);
+}
+
+.color-preset.active {
+  border-color: var(--color-accent);
+  box-shadow: 0 0 15px currentColor;
+}
+
+.color-preset.active::after {
+  content: "✓";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: #fff;
+  font-size: 1rem;
+  text-shadow: 0 0 5px rgba(0, 0, 0, 0.8);
+}
+
+.custom-color-section {
+  border-top: 1px solid var(--color-metal);
+  padding-top: 1.5rem;
+}
+
+.custom-color-label {
+  font-family: var(--font-body);
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  margin-bottom: 0.75rem;
+  display: block;
+}
+
+.color-input-wrapper {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.color-input {
+  width: 60px;
+  height: 40px;
+  border: 2px solid var(--color-metal);
+  background: transparent;
+  cursor: pointer;
+  padding: 0;
+  overflow: hidden;
+}
+
+.color-input::-webkit-color-swatch-wrapper {
+  padding: 0;
+}
+
+.color-input::-webkit-color-swatch {
+  border: none;
+}
+
+.color-hex-input {
+  flex: 1;
+  background: var(--color-bg);
+  border: 2px solid var(--color-metal);
+  padding: 0.75rem;
+  color: var(--color-text);
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+  text-transform: uppercase;
+}
+
+.color-hex-input:focus {
+  outline: none;
+  border-color: var(--color-neon);
+}
+
+.reset-colors-btn {
+  width: 100%;
+  margin-top: 1rem;
+  padding: 0.75rem;
+  background: transparent;
+  border: 2px solid var(--color-metal);
+  color: var(--color-text-muted);
+  font-family: var(--font-body);
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.reset-colors-btn:hover {
+  border-color: var(--color-neon);
+  color: var(--color-neon);
+}
+
+/* Seccion de temas */
+.theme-section {
+  border-top: 1px solid var(--color-metal);
+  padding-top: 1.5rem;
+  margin-top: 1.5rem;
+}
+
+.theme-label {
+  font-family: var(--font-body);
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  margin-bottom: 1rem;
+  display: block;
+}
+
+.theme-options {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.theme-btn {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.875rem;
+  background: var(--color-bg);
+  border: 2px solid var(--color-metal);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-align: left;
+  width: 100%;
+}
+
+.theme-btn:hover {
+  border-color: var(--color-neon);
+  background: rgba(255, 107, 0, 0.05);
+}
+
+.theme-btn.active {
+  border-color: var(--color-neon);
+  background: rgba(255, 107, 0, 0.1);
+}
+
+.theme-preview {
+  width: 40px;
+  height: 40px;
+  border-radius: 4px;
+  position: relative;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.theme-preview span {
+  position: absolute;
+  font-size: 0.6rem;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.theme-preview .t-bg {
+  top: 4px;
+  left: 4px;
+}
+
+.theme-preview .t-accent {
+  bottom: 4px;
+  right: 4px;
+}
+
+.theme-info {
+  flex: 1;
+}
+
+.theme-name {
+  font-family: var(--font-heading);
+  font-size: 0.9rem;
+  color: var(--color-accent);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  display: block;
+  margin-bottom: 0.25rem;
+}
+
+.theme-desc {
+  font-size: 0.7rem;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+/* ============================================
+    DEFINICIONES DE TEMAS
+    ============================================ */
+
+/* TEMA INDUSTRIAL (Default) */
+body[data-theme="industrial"] {
+  --color-bg: #0a0a0a !important;
+  --color-bg-alt: #111111;
+  --color-accent: #ffffff;
+  --color-text: #e0e0e0;
+  --color-text-muted: #666666;
+  --color-metal: #2a2a2a;
+  --color-secondary: #1a1a1a;
+  --font-display: "Archivo Black", sans-serif;
+  --font-heading: "Oswald", sans-serif;
+  --font-body: "JetBrains Mono", monospace;
+  --radius: 0px;
+  --radius-lg: 0px;
+  --border-width: 2px;
+  --shadow: 0 0 20px rgba(255, 107, 0, 0.2);
+  --shadow-hover: 0 0 40px rgba(255, 107, 0, 0.4);
+  --backdrop-blur: 0px;
+  --noise-opacity: 0.03;
+}
+
+/* TEMA MINIMAL */
+body[data-theme="minimal"] {
+  --color-bg: #fafafa !important;
+  --color-bg-alt: #ffffff;
+  --color-accent: #1a1a1a;
+  --color-text: #333333;
+  --color-text-muted: #888888;
+  --color-metal: #e5e5e5;
+  --color-secondary: #f0f0f0;
+  --font-display: "Playfair Display", serif;
+  --font-heading: "Work Sans", sans-serif;
+  --font-body: "Work Sans", sans-serif;
+  --radius: 8px;
+  --radius-lg: 12px;
+  --border-width: 1px;
+  --shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  --shadow-hover: 0 10px 40px rgba(0, 0, 0, 0.1);
+  --backdrop-blur: 10px;
+  --noise-opacity: 0;
+}
+
+body[data-theme="minimal"] .hero-title span {
+  -webkit-text-stroke: 0;
+  color: var(--color-accent);
+}
+
+body[data-theme="minimal"] .hero-title .highlight {
+  color: var(--color-neon);
+  text-shadow: none;
+}
+
+body[data-theme="minimal"] .nav-rotularte {
+  background: linear-gradient(
+    to bottom,
+    var(--color-bg) 0%,
+    rgba(250, 250, 250, 0.9) 100%
+  );
+}
+
+/* TEMA BRUTALIST */
+body[data-theme="brutalist"] {
+  --color-bg: #000000 !important;
+  --color-bg-alt: #000000;
+  --color-accent: #ffffff;
+  --color-text: #ffffff;
+  --color-text-muted: #666666;
+  --color-metal: #ffffff;
+  --color-secondary: #111111;
+  --font-display: "Bebas Neue", sans-serif;
+  --font-heading: "Archivo Black", sans-serif;
+  --font-body: "Space Grotesk", monospace;
+  --radius: 0px;
+  --radius-lg: 0px;
+  --border-width: 3px;
+  --shadow: none;
+  --shadow-hover: none;
+  --backdrop-blur: 0px;
+  --noise-opacity: 0.05;
+}
+
+body[data-theme="brutalist"] * {
+  border-radius: 0 !important;
+}
+
+/* TEMA VAPORWAVE */
+body[data-theme="vaporwave"] {
+  --color-bg: #0c0518 !important;
+  --color-bg-alt: #120824;
+  --color-accent: #ffffff;
+  --color-text: #e0e0ff;
+  --color-text-muted: #8a7a9e;
+  --color-metal: #1a0f2e;
+  --color-secondary: #1a0a30;
+  --font-display: "Montserrat", sans-serif;
+  --font-heading: "Rajdhani", sans-serif;
+  --font-body: "Space Grotesk", sans-serif;
+  --radius: 12px;
+  --radius-lg: 20px;
+  --border-width: 1px;
+  --shadow: 0 8px 32px rgba(255, 113, 206, 0.2);
+  --shadow-hover: 0 12px 48px rgba(255, 113, 206, 0.4);
+  --backdrop-blur: 20px;
+  --noise-opacity: 0.02;
+}
+
+body[data-theme="vaporwave"] .hero-title {
+  text-shadow: none;
+}
+
+body[data-theme="vaporwave"] .hero-title span {
+  -webkit-text-stroke: 0;
+  color: transparent;
+}
+
+body[data-theme="vaporwave"] .hero-title .highlight {
+  background: linear-gradient(135deg, #ff71ce 0%, #01cdfe 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* TEMA CYBERPUNK */
+body[data-theme="cyberpunk"] {
+  --color-bg: #050810 !important;
+  --color-bg-alt: #0a1020;
+  --color-accent: #ffffff;
+  --color-text: #a0ffe0;
+  --color-text-muted: #507060;
+  --color-metal: #102030;
+  --color-secondary: #081018;
+  --font-display: "Rajdhani", sans-serif;
+  --font-heading: "Oswald", sans-serif;
+  --font-body: "JetBrains Mono", monospace;
+  --radius: 4px;
+  --radius-lg: 8px;
+  --border-width: 1px;
+  --shadow: 0 0 20px rgba(0, 255, 159, 0.2);
+  --shadow-hover: 0 0 40px rgba(0, 255, 159, 0.5);
+  --backdrop-blur: 10px;
+  --noise-opacity: 0.04;
+}
+
+body[data-theme="cyberpunk"] .hero-title span {
+  -webkit-text-stroke: 1px var(--color-neon);
+}
+
+body[data-theme="cyberpunk"] .hero-title .highlight {
+  color: var(--color-neon);
+  text-shadow:
+    0 0 10px var(--color-neon),
+    0 0 20px var(--color-neon),
+    0 0 40px var(--color-neon-glow);
+}
+
+body[data-theme="cyberpunk"] .section-hero::before {
+  background-image:
+    linear-gradient(rgba(0, 255, 159, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 255, 159, 0.03) 1px, transparent 1px);
+}
+
+/* ============================================
+    EFECTOS ESPECIALES POR TEMA
+    ============================================ */
+
+/* Efecto scanline para Cyberpunk */
+body[data-theme="cyberpunk"] .section-hero::after,
+body[data-theme="cyberpunk"] .section-stats::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    to bottom,
+    transparent 50%,
+    rgba(0, 255, 159, 0.03) 50%
+  );
+  background-size: 100% 4px;
+  pointer-events: none;
+  z-index: 10;
+  animation: scanline 8s linear infinite;
+}
+
+@keyframes scanline {
+  0% {
+    transform: translateY(0);
+  }
+  100% {
+    transform: translateY(100vh);
+  }
+}
+
+/* Efecto cromado/iridiscente para Vaporwave */
+body[data-theme="vaporwave"] .hero-title,
+body[data-theme="vaporwave"] .section-title {
+  background: linear-gradient(
+    135deg,
+    #ff71ce 0%,
+    #01cdfe 25%,
+    #05ffa1 50%,
+    #b967ff 75%,
+    #ff71ce 100%
+  );
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-shadow: none !important;
+  animation: chromatic 5s ease infinite;
+  background-size: 300% 300%;
+}
+
+@keyframes chromatic {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+/* Efecto glitch para Cyberpunk */
+body[data-theme="cyberpunk"] .hero-title:hover,
+body[data-theme="cyberpunk"] .logo-rotularte:hover {
+  animation: glitch 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94) both infinite;
+}
+
+@keyframes glitch {
+  0% {
+    transform: translate(0);
+    text-shadow:
+      -2px 0 #ff00ff,
+      2px 0 #00ff9f;
+  }
+  20% {
+    transform: translate(-2px, 2px);
+    text-shadow:
+      2px 0 #ff00ff,
+      -2px 0 #00ff9f;
+  }
+  40% {
+    transform: translate(-2px, -2px);
+    text-shadow:
+      -2px 0 #00ff9f,
+      2px 0 #ff00ff;
+  }
+  60% {
+    transform: translate(2px, 2px);
+    text-shadow:
+      2px 0 #ff00ff,
+      -2px 0 #00ff9f;
+  }
+  80% {
+    transform: translate(2px, -2px);
+    text-shadow:
+      -2px 0 #00ff9f,
+      2px 0 #ff00ff;
+  }
+  100% {
+    transform: translate(0);
+    text-shadow:
+      -2px 0 #ff00ff,
+      2px 0 #00ff9f;
+  }
+}
+
+/* Grid tecnico visible para Industrial */
+body[data-theme="industrial"] .section-hero::before {
+  background-image:
+    linear-gradient(rgba(255, 107, 0, 0.1) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 107, 0, 0.1) 1px, transparent 1px);
+  background-size: 40px 40px;
+}
+
+/* Perspectiva 3D para Vaporwave */
+body[data-theme="vaporwave"] .services-grid {
+  transform: perspective(1000px) rotateX(5deg);
+  transform-style: preserve-3d;
+}
+
+body[data-theme="vaporwave"] .service-card {
+  transform: translateZ(20px);
+  transition: transform 0.4s ease;
+}
+
+body[data-theme="vaporwave"] .service-card:hover {
+  transform: translateZ(50px) scale(1.05);
+}
+
+/* Bordes brutales para Brutalista */
+body[data-theme="brutalist"] * {
+  border-radius: 0 !important;
+}
+
+body[data-theme="brutalist"] .btn-rotularte {
+  box-shadow: 4px 4px 0px var(--color-accent);
+  transform: translate(0, 0);
+  transition: all 0.1s ease;
+}
+
+body[data-theme="brutalist"] .btn-rotularte:hover {
+  box-shadow: 0px 0px 0px var(--color-accent);
+  transform: translate(4px, 4px);
+}
+
+body[data-theme="brutalist"] .service-card,
+body[data-theme="brutalist"] .stat-item {
+  border-width: 3px;
+  border-color: var(--color-accent);
+}
+
+/* Minimal - Mucho mas aire y elegancia */
+body[data-theme="minimal"] section {
+  padding-top: 12rem;
+  padding-bottom: 12rem;
+}
+
+body[data-theme="minimal"] .hero-title {
+  font-weight: 300;
+  letter-spacing: -2px;
+}
+
+body[data-theme="minimal"] .hero-title span {
+  -webkit-text-stroke: 0;
+  color: var(--color-text);
+  font-style: italic;
+}
+
+body[data-theme="minimal"] .service-card {
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+  border: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+body[data-theme="minimal"] .service-card:hover {
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.08);
+  transform: translateY(-10px);
+}
+
+/* Neon pulsante intensificado */
+body[data-theme="cyberpunk"] .neon-text {
+  animation: neonPulseCyber 1s ease-in-out infinite alternate;
+}
+
+@keyframes neonPulseCyber {
+  from {
+    text-shadow:
+      0 0 10px var(--color-neon),
+      0 0 20px var(--color-neon),
+      0 0 40px var(--color-neon),
+      0 0 80px var(--color-neon);
+  }
+  to {
+    text-shadow:
+      0 0 20px var(--color-neon),
+      0 0 40px var(--color-neon),
+      0 0 80px var(--color-neon),
+      0 0 120px var(--color-neon-glow);
+  }
+}
+
+/* Efecto vidrio esmerilado */
+body[data-theme="vaporwave"] .nav-rotularte,
+body[data-theme="vaporwave"] .cart-sidebar {
+  background: rgba(12, 5, 24, 0.7);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+}
+
+/* ============================================
+   ANIMACIONES
+   ============================================ */
+
+@keyframes neonPulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.9;
+  }
+}
+
+@keyframes flicker {
+  0%,
+  100% {
+    box-shadow:
+      0 0 20px rgba(255, 107, 0, 0.2),
+      inset 0 0 20px rgba(255, 107, 0, 0.1);
+  }
+  50% {
+    box-shadow:
+      0 0 40px rgba(255, 107, 0, 0.4),
+      0 0 60px rgba(255, 107, 0, 0.2),
+      inset 0 0 30px rgba(255, 107, 0, 0.2);
+  }
+  52% {
+    box-shadow:
+      0 0 20px rgba(255, 107, 0, 0.2),
+      inset 0 0 20px rgba(255, 107, 0, 0.1);
+  }
+  54% {
+    box-shadow:
+      0 0 40px rgba(255, 107, 0, 0.4),
+      0 0 60px rgba(255, 107, 0, 0.2),
+      inset 0 0 30px rgba(255, 107, 0, 0.2);
+  }
+}
+
+/* ============================================
+   SCROLLBAR PERSONALIZADA
+   ============================================ */
+
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-bg);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-metal);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-neon);
+}
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+
+@media (max-width: 1024px) {
+  .nav-rotularte {
+    padding: 1rem 2rem;
+  }
+
+  .nav-links-rotularte {
+    gap: 2rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .nav-rotularte {
+    padding: 1rem;
+  }
+
+  .nav-links-rotularte {
+    display: none;
+  }
+
+  .color-picker-panel {
+    width: calc(100vw - 2rem);
+    right: 1rem;
+    left: 1rem;
+    bottom: 80px;
+  }
+
+  .color-picker-toggle {
+    width: 50px;
+    height: 50px;
+    bottom: 1rem;
+    right: 1rem;
+  }
+
+  .color-picker-toggle svg {
+    width: 24px;
+    height: 24px;
+  }
+}
+
+/* Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

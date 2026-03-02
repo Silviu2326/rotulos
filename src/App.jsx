@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { Routes, Route, Navigate, useLocation } from "react-router-dom";
 import {
   ShoppingBag,
   Palette,
@@ -9,8 +10,6 @@ import {
   User,
   Plus,
   ChevronRight,
-  Settings,
-  LogOut,
   HelpCircle,
 } from "lucide-react";
 import Sidebar from "./components/Sidebar";
@@ -25,6 +24,12 @@ import EditorPage from "./pages/EditorPage";
 import StatsPage from "./pages/StatsPage";
 import ProductsPage from "./pages/ProductsPage";
 import SettingsPage from "./pages/SettingsPage";
+import LandingPage from "./pages/LandingPage";
+// Nuevas páginas
+import HomePage from "./pages/HomePage";
+import NeonEditorPage from "./pages/NeonEditorPage";
+import StorePage from "./pages/StorePage";
+
 import "./styles/sidebar.css";
 import "./styles/header.css";
 import "./components/Dashboard.css";
@@ -172,16 +177,12 @@ function Dashboard({ mounted }) {
   );
 }
 
-function App() {
+// Componente para el Backoffice con navegación
+function Backoffice() {
   const [mounted, setMounted] = useState(false);
   const [currentPage, setCurrentPage] = useState("dashboard");
   const [selectedOrderId, setSelectedOrderId] = useState(null);
   const [currentTime, setCurrentTime] = useState(new Date());
-
-  // Detectar si estamos en modo standalone (editor en nueva pestaña)
-  const isStandalone =
-    window.location.search.includes("standalone=true") ||
-    window.location.pathname === "/editor";
 
   useEffect(() => {
     setMounted(true);
@@ -193,15 +194,6 @@ function App() {
     return date.toLocaleTimeString("es-ES", {
       hour: "2-digit",
       minute: "2-digit",
-    });
-  };
-
-  const formatDate = (date) => {
-    return date.toLocaleDateString("es-ES", {
-      weekday: "long",
-      year: "numeric",
-      month: "long",
-      day: "numeric",
     });
   };
 
@@ -238,15 +230,6 @@ function App() {
   };
 
   const pageInfo = getPageTitle();
-
-  // Si estamos en modo standalone, mostrar solo el editor
-  if (isStandalone) {
-    return (
-      <div className="min-h-screen bg-gray-100">
-        <EditorPage standalone={true} />
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen bg-gray-100 flex">
@@ -373,6 +356,49 @@ function App() {
         </div>
       </main>
     </div>
+  );
+}
+
+function App() {
+  const location = useLocation();
+
+  // Detectar si estamos en una ruta del backoffice
+  const isBackoffice = location.pathname.startsWith("/admin");
+
+  // Detectar si estamos en modo standalone (editor en nueva pestaña)
+  const isStandalone = window.location.search.includes("standalone=true");
+
+  // Si estamos en modo standalone, mostrar solo el editor
+  if (isStandalone) {
+    return (
+      <div className="min-h-screen bg-gray-100">
+        <EditorPage standalone={true} />
+      </div>
+    );
+  }
+
+  return (
+    <Routes>
+      {/* Rutas públicas con el diseño ROTULARTE */}
+      <Route path="/" element={<HomePage />} />
+      <Route path="/inicio" element={<Navigate to="/" replace />} />
+      <Route path="/editor" element={<NeonEditorPage />} />
+      <Route path="/tienda" element={<StorePage />} />
+
+      {/* Ruta de landing original */}
+      <Route
+        path="/landing"
+        element={
+          <LandingPage onEnterApp={() => (window.location.href = "/admin")} />
+        }
+      />
+
+      {/* Rutas del backoffice */}
+      <Route path="/admin/*" element={<Backoffice />} />
+
+      {/* Redirección por defecto */}
+      <Route path="*" element={<Navigate to="/" replace />} />
+    </Routes>
   );
 }
 
