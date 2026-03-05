@@ -342,6 +342,10 @@
   gap: 24px;
 }
 
+.oferta-item {
+  width: 100%;
+}
+
 @media (max-width: 1200px) {
   .flat-image-box {
     grid-template-columns: repeat(2, 1fr);

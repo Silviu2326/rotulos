@@ -1112,7 +1112,26 @@
 
 /* Grid de Ofertas */
 .flat-row {
-  padding: 60px 0;
+  padding: 0;
+  margin: 0;
+}
+
+.flat-row.row-image-box .row {
+  margin: 0;
+}
+
+.flat-row.row-image-box .col-md-12 {
+  padding: 0;
+}
+
+/* Eliminar espacio entre banner y ofertas */
+.home-banner {
+  margin-bottom: 0;
+}
+
+.flat-row.row-image-box {
+  margin-top: 0;
+  padding-top: 0;
 }
 
 .flat-row.row-image-box {
@@ -1120,7 +1139,7 @@
 }
 
 .offers-inner-box {
-  min-height: 280px;
+  min-height: auto;
   contain: layout;
 }
 
@@ -2562,12 +2581,28 @@
   padding-top: 1rem;
 }
 
+/* Grid de Ofertas - 4 columnas */
+.flat-image-box {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+  width: 100%;
+}
+
+.oferta-item {
+  width: 100%;
+}
+
 /* Responsive */
 @media (max-width: 1199px) {
   .col-md-3,
   .col-md-4,
   .col-md-6 {
     width: 50%;
+  }
+
+  .flat-image-box {
+    grid-template-columns: repeat(2, 1fr);
   }
 
   .instagram-wrap {
@@ -2645,6 +2680,10 @@
 
   .instagram-wrap {
     grid-template-columns: repeat(2, 1fr);
+  }
+
+  .flat-image-box {
+    grid-template-columns: 1fr;
   }
 
   .product {

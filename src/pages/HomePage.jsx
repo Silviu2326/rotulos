@@ -446,15 +446,15 @@ const OfertasGrid = () => {
   const navigate = useNavigate();
 
   return (
-    <section className="flat-row row-image-box pt-3">
+    <section className="flat-row row-image-box">
       <div className="container-fluid">
         <div className="row">
           <div className="col-md-12">
-            <div className="flat-image-box style-1 row data-effect clearfix">
+            <div className="flat-image-box style-1 data-effect clearfix">
               {OFERTAS_INDEX.map((oferta) => (
                 <div
                   key={oferta.id}
-                  className="col-12 col-md-6 col-lg-3 m-b-lg"
+                  className="oferta-item"
                 >
                   <div className="item data-effect-item offers-inner-box">
                     <div className="inner offers-inner">

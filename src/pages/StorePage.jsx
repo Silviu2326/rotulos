@@ -518,9 +518,9 @@ const CategoriasGrid = ({ onCategoryClick }) => {
   return (
     <section className="categorias-section">
       <div className="container">
-        <div className="flat-image-box style-1 row data-effect clearfix">
+        <div className="flat-image-box style-1 data-effect clearfix">
           {CATEGORIAS_DATA.map((cat) => (
-            <div key={cat.id} className="col-12 col-md-6 col-lg-3 m-b-lg">
+            <div key={cat.id} className="oferta-item">
               <div className="item data-effect-item offers-inner-box">
                 <div className="inner offers-inner">
                   <div className="thumb">
@@ -1052,7 +1052,7 @@ const StorePage = () => {
 
           {activeFilter === "all" && (
             <>
-              <h2 className="section-title">Lorem Ipsum Categories</h2>
+              <h2 className="section-title">ategorias</h2>
               <CategoriasGrid onCategoryClick={handleCategoryClick} />
             </>
           )}
