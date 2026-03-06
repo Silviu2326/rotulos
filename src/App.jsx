@@ -29,6 +29,7 @@ import LandingPage from "./pages/LandingPage";
 import HomePage from "./pages/HomePage";
 import NeonEditorPage from "./pages/NeonEditorPage";
 import StorePage from "./pages/StorePage";
+import PromptConfigPage from "./pages/PromptConfigPage";
 
 import "./styles/sidebar.css";
 import "./styles/header.css";
@@ -384,6 +385,7 @@ function App() {
       <Route path="/inicio" element={<Navigate to="/" replace />} />
       <Route path="/editor" element={<NeonEditorPage />} />
       <Route path="/tienda" element={<StorePage />} />
+      <Route path="/prompt-config" element={<PromptConfigPage />} />
 
       {/* Ruta de landing original */}
       <Route

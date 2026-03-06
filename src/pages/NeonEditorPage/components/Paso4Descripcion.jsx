@@ -1,5 +1,6 @@
 import { Sparkles, Ruler } from "lucide-react";
 import { TIPOS_LETRAS_CORPOREAS, COLORES_LUZ_LED, CATEGORIAS_PRODUCTO } from "../data/constants";
+import { generarDescripcionMejorada } from "../../../data/prompts";
 
 export const Paso4Descripcion = ({
   categoria,
@@ -16,14 +17,13 @@ export const Paso4Descripcion = ({
 }) => {
   const mejorarDescripcionConIA = () => {
     if (!descripcionDiseño.trim()) return;
-    const mejoras = [
-      "Diseño elegante con tipografía moderna y colores vibrantes",
-      "Estilo profesional con acabados premium",
-      "Diseño atractivo con elementos visuales llamativos",
-      "Estilo minimalista con líneas limpias",
-    ];
-    const mejoraAleatoria = mejoras[Math.floor(Math.random() * mejoras.length)];
-    setDescripcionMejorada(`${descripcionDiseño}. ${mejoraAleatoria}`);
+    const mejorada = generarDescripcionMejorada(
+      descripcionDiseño,
+      categoria,
+      "moderno", // estilo por defecto
+      null // tipoNegocio
+    );
+    setDescripcionMejorada(mejorada);
   };
 
   const categoriaInfo = CATEGORIAS_PRODUCTO.find((cat) => cat.id === categoria);

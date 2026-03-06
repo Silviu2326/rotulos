@@ -1,4 +1,5 @@
-import { RefreshCcw } from "lucide-react";
+import { RefreshCcw, ChevronLeft, ChevronRight } from "lucide-react";
+import { useState } from "react";
 
 export const TabDesign = ({
   showPreview,
@@ -12,8 +13,27 @@ export const TabDesign = ({
   setImagenActiva,
   nombreNegocio,
   canvasRef,
-  hook
+  hook,
+  setsGenerados,
+  setSetActivo
 }) => {
+  const [variacionActiva, setVariacionActiva] = useState(0);
+
+  // Determinar qué mostrar según si hay sets generados o no
+  const tieneSets = setsGenerados && setsGenerados.length > 0;
+  const rotuloActual = tieneSets ? setsGenerados[variacionActiva]?.rotulo : rotuloAislado;
+  const mockupsActuales = tieneSets ? [
+    { tipo: 'exterior', imagen: setsGenerados[variacionActiva]?.mockup }
+  ] : mockups;
+
+  const cambiarVariacion = (direccion) => {
+    const nuevaVariacion = direccion === 'next' 
+      ? (variacionActiva + 1) % setsGenerados.length
+      : (variacionActiva - 1 + setsGenerados.length) % setsGenerados.length;
+    setVariacionActiva(nuevaVariacion);
+    if (setSetActivo) setSetActivo(nuevaVariacion);
+  };
+
   if (!showPreview) {
     return (
       <div className="empty" id="empty">
@@ -30,9 +50,10 @@ export const TabDesign = ({
         <div className="loading-spinner"></div>
         <h3 className="loading-title">Generando...</h3>
         <p className="loading-text">
-          {progresoGeneracion < 30 ? 'Paso 1/3: Rótulo aislado...' :
-           progresoGeneracion < 70 ? 'Paso 2/3: Mockups...' :
-           'Finalizando...'}
+          {progresoGeneracion < 30 ? 'Paso 1/4: Rótulo 1...' :
+           progresoGeneracion < 50 ? 'Paso 2/4: Mockup 1...' :
+           progresoGeneracion < 75 ? 'Paso 3/4: Rótulo 2...' :
+           'Paso 4/4: Mockup 2...'}
         </p>
         <div className="loading-progress">
           <div className="loading-progress-bar" style={{ width: `${progresoGeneracion}%` }}></div>
@@ -54,6 +75,39 @@ export const TabDesign = ({
 
   return (
     <div className="result" id="result">
+      {/* Selector de variaciones (solo si hay sets) */}
+      {tieneSets && (
+        <div className="variacion-selector" style={{
+          display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '12px',
+          marginBottom: '12px', padding: '10px',
+          background: 'var(--color-bg-alt)', borderRadius: '8px'
+        }}>
+          <button 
+            onClick={() => cambiarVariacion('prev')}
+            style={{
+              padding: '6px 12px', border: 'none', borderRadius: '6px',
+              background: 'var(--color-bg)', color: 'var(--color-text)',
+              cursor: 'pointer', display: 'flex', alignItems: 'center'
+            }}
+          >
+            <ChevronLeft size={18} />
+          </button>
+          <span style={{ fontWeight: 500, color: 'var(--color-text)' }}>
+            Variación {variacionActiva + 1} de {setsGenerados.length}
+          </span>
+          <button 
+            onClick={() => cambiarVariacion('next')}
+            style={{
+              padding: '6px 12px', border: 'none', borderRadius: '6px',
+              background: 'var(--color-bg)', color: 'var(--color-text)',
+              cursor: 'pointer', display: 'flex', alignItems: 'center'
+            }}
+          >
+            <ChevronRight size={18} />
+          </button>
+        </div>
+      )}
+
       {/* Selector de imágenes */}
       <div className="image-selector" style={{
         display: 'flex', gap: '8px', marginBottom: '16px', padding: '8px',
@@ -71,7 +125,7 @@ export const TabDesign = ({
         >
           🎨 Rótulo
         </button>
-        {mockups.find(m => m.tipo === 'exterior') && (
+        {mockupsActuales.find(m => m.tipo?.includes('exterior')) && (
           <button 
             className={`image-selector-btn ${imagenActiva === 'exterior' ? 'active' : ''}`}
             onClick={() => setImagenActiva('exterior')}
@@ -85,20 +139,6 @@ export const TabDesign = ({
             🏪 Exterior
           </button>
         )}
-        {mockups.find(m => m.tipo === 'interior') && (
-          <button 
-            className={`image-selector-btn ${imagenActiva === 'interior' ? 'active' : ''}`}
-            onClick={() => setImagenActiva('interior')}
-            style={{
-              flex: 1, padding: '8px 12px', border: 'none', borderRadius: '6px',
-              background: imagenActiva === 'interior' ? 'var(--color-neon)' : 'transparent',
-              color: imagenActiva === 'interior' ? '#000' : 'var(--color-text)',
-              cursor: 'pointer'
-            }}
-          >
-            🏢 Interior
-          </button>
-        )}
       </div>
 
       {/* Imagen principal */}
@@ -107,24 +147,17 @@ export const TabDesign = ({
         background: imagenActiva === 'rotulo' ? '#1a1a1a' : 'var(--color-bg-alt)',
         borderRadius: '8px'
       }}>
-        {imagenActiva === 'rotulo' && rotuloAislado ? (
+        {imagenActiva === 'rotulo' && rotuloActual ? (
           <img 
-            src={rotuloAislado} 
+            src={rotuloActual} 
             alt={`Rótulo ${nombreNegocio}`} 
             className="canvas-preview"
             style={{ maxWidth: '100%', maxHeight: '500px', objectFit: 'contain' }}
           />
-        ) : imagenActiva === 'exterior' && mockups.find(m => m.tipo === 'exterior') ? (
+        ) : imagenActiva === 'exterior' && mockupsActuales.find(m => m.tipo?.includes('exterior')) ? (
           <img 
-            src={mockups.find(m => m.tipo === 'exterior').imagen} 
+            src={mockupsActuales.find(m => m.tipo?.includes('exterior')).imagen} 
             alt={`${nombreNegocio} exterior`} 
-            className="canvas-preview"
-            style={{ maxWidth: '100%', maxHeight: '500px', objectFit: 'contain' }}
-          />
-        ) : imagenActiva === 'interior' && mockups.find(m => m.tipo === 'interior') ? (
-          <img 
-            src={mockups.find(m => m.tipo === 'interior').imagen} 
-            alt={`${nombreNegocio} interior`} 
             className="canvas-preview"
             style={{ maxWidth: '100%', maxHeight: '500px', objectFit: 'contain' }}
           />
@@ -132,8 +165,8 @@ export const TabDesign = ({
           <canvas ref={canvasRef} className="canvas-preview" />
         )}
         <div className="quality-badge" id="quality-badge">
-          {imagenActiva === 'rotulo' ? 'Rótulo Aislado' : 
-           imagenActiva === 'exterior' ? 'Fachada Exterior' : 'Interior'}
+          {imagenActiva === 'rotulo' ? `Rótulo Aislado ${tieneSets ? variacionActiva + 1 : ''}` : 
+           imagenActiva === 'exterior' ? `Fachada Exterior ${tieneSets ? variacionActiva + 1 : ''}` : 'Interior'}
         </div>
       </div>
       

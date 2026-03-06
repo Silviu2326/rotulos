@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { Palette, X, Check } from "lucide-react";
+import { Palette, X, Check, LayoutList, Layers } from "lucide-react";
 
 const THEMES = [
   { id: 'industrial', label: 'Industrial', color: '#ff6b00', gradient: 'linear-gradient(135deg, #ff6b00 0%, #ff8533 100%)' },
@@ -9,7 +9,19 @@ const THEMES = [
   { id: 'brutalist', label: 'Brutal', color: '#ffffff', gradient: 'linear-gradient(135deg, #ff0000 0%, #000000 100%)' },
 ];
 
-export const FloatingThemeMenu = ({ theme, setTheme, neonColor, setNeonColor }) => {
+const MODOS = [
+  { id: 'wizard', label: 'Por Pasos', icon: Layers, desc: 'Wizard paso a paso' },
+  { id: 'completo', label: 'Todo Seguido', icon: LayoutList, desc: 'Formulario completo' },
+];
+
+export const FloatingThemeMenu = ({ 
+  theme, 
+  setTheme, 
+  neonColor, 
+  setNeonColor,
+  modoVisualizacion,
+  setModoVisualizacion
+}) => {
   const [isOpen, setIsOpen] = useState(false);
   const menuRef = useRef(null);
 
@@ -25,6 +37,7 @@ export const FloatingThemeMenu = ({ theme, setTheme, neonColor, setNeonColor }) 
   }, []);
 
   const currentTheme = THEMES.find(t => t.id === theme) || THEMES[0];
+  const currentModo = MODOS.find(m => m.id === modoVisualizacion) || MODOS[0];
 
   return (
     <div ref={menuRef} className="floating-theme-container">
@@ -63,6 +76,28 @@ export const FloatingThemeMenu = ({ theme, setTheme, neonColor, setNeonColor }) 
                 />
                 <span className="theme-option-label">{t.label}</span>
                 {theme === t.id && <Check size={16} className="theme-check" />}
+              </button>
+            ))}
+          </div>
+
+          <div className="theme-menu-divider" />
+
+          {/* Selector de modo de visualización */}
+          <div className="theme-menu-header">
+            <currentModo.icon size={18} />
+            <span>Modo de Vista</span>
+          </div>
+
+          <div className="theme-options-list">
+            {MODOS.map((m) => (
+              <button
+                key={m.id}
+                className={`theme-option-item ${modoVisualizacion === m.id ? 'active' : ''}`}
+                onClick={() => setModoVisualizacion(m.id)}
+              >
+                <m.icon size={16} style={{ marginRight: 8, opacity: 0.7 }} />
+                <span className="theme-option-label">{m.label}</span>
+                {modoVisualizacion === m.id && <Check size={16} className="theme-check" />}
               </button>
             ))}
           </div>

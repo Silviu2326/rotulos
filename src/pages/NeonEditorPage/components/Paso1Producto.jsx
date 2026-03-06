@@ -1,6 +1,22 @@
 import { Lightbulb, Type as TypeIcon, Scroll } from "lucide-react";
 import { CATEGORIAS_PRODUCTO } from "../data/constants";
 
+// Mapeo de imágenes para cada categoría
+const TYPE_IMAGES = {
+  'rotulos': '/img/rotulemos-rotulo-luminoso.webp',
+  'letras-neon': '/img/rotulo-de-neon-.webp',
+  'letras-corporeas': '/img/letras-retroiluminadas.webp',
+  'lonas-pancartas': '/img/lonas-y-pancartas-publicitarias-comprar.webp',
+  'vinilos': '/img/vinilo-miccroperforado.webp',
+  'banderolas': '/img/banderola-luminosa.webp',
+  'rigidos-impresos': '/img/PVC-FOREX.webp',
+  'rollup': '/img/ROLL-UP-DISPLAY.jpg',
+  'photocall': '/img/photocall-pop-up.jpg',
+  'carteles-inmobiliarios': '/img/carteles-inmobiliaria.webp',
+  'mupis': '/img/mupi-publicitario.webp',
+  'flybanner': '/img/fly-banneer.webp'
+};
+
 export const Paso1Producto = ({ 
   categoria, 
   setCategoria, 
@@ -14,16 +30,30 @@ export const Paso1Producto = ({
       <div className="grid-categorias">
         {CATEGORIAS_PRODUCTO.map((cat) => {
           const Icono = cat.icono;
+          const imageUrl = TYPE_IMAGES[cat.id];
           return (
             <button
               key={cat.id}
               className={`categoria-card ${categoria === cat.id ? "activa" : ""}`}
               onClick={() => setCategoria(cat.id)}
             >
-              <Icono size={32} className="categoria-icono" />
+              {/* Imagen del producto */}
+              <div className="categoria-imagen">
+                <img 
+                  src={imageUrl} 
+                  alt={cat.nombre}
+                  onError={(e) => {
+                    // Si falla la imagen, mostrar el icono
+                    e.target.style.display = 'none';
+                    e.target.nextSibling.style.display = 'flex';
+                  }}
+                />
+                <div className="categoria-icono-fallback" style={{ display: 'none' }}>
+                  <Icono size={32} />
+                </div>
+              </div>
               <h3 className="categoria-nombre">{cat.nombre}</h3>
               <p className="categoria-desc">{cat.desc}</p>
-              <div className="categoria-precio">Desde {cat.precioBase}€/{cat.unidad}</div>
             </button>
           );
         })}

@@ -119,10 +119,30 @@ export const ESTILOS_LONA = [
 ];
 
 export const ACABADOS_SUPERFICIALES = [
-  { id: "lacado-brillo", nombre: "Lacado brillo", icono: "✨", desc: "Lacado con acabado brillante" },
-  { id: "lacado-mate", nombre: "Lacado mate", icono: "🎨", desc: "Lacado con acabado mate" },
-  { id: "cepillado", nombre: "Cepillado", icono: "〰️", desc: "Acabado cepillado metálico" },
-  { id: "espejo", nombre: "Espejo", icono: "🪞", desc: "Acabado espejo pulido" },
+  { id: "lacado-brillo", nombre: "Lacado brillo", icono: "✨", desc: "Lacado con acabado brillante y reflectante" },
+  { id: "lacado-mate", nombre: "Lacado mate", icono: "🎨", desc: "Lacado con acabado mate suave" },
+  { id: "cepillado", nombre: "Cepillado", icono: "〰️", desc: "Acabado metálico cepillado con textura" },
+  { id: "espejo", nombre: "Espejo", icono: "🪞", desc: "Acabado espejo pulido high-gloss" },
+  { id: "anodizado", nombre: "Anodizado", icono: "🔷", desc: "Acabado anodizado profesional" },
+  { id: "oxido", nombre: "Óxido", icono: "🟤", desc: "Efecto óxido industrial vintage" },
+];
+
+// Modos de iluminación HDRI
+export const MODOS_ILUMINACION = [
+  { id: "studio", nombre: "Studio", icono: "💡", desc: "Iluminación de estudio profesional" },
+  { id: "dia", nombre: "Día", icono: "☀️", desc: "Luz natural diurna" },
+  { id: "noche", nombre: "Noche", icono: "🌙", desc: "Ambiente nocturno con iluminación artificial" },
+  { id: "atardecer", nombre: "Atardecer", icono: "🌅", desc: "Luz cálida de atardecer" },
+  { id: "interior", nombre: "Interior", icono: "🏢", desc: "Iluminación de interior comercial" },
+];
+
+// Opciones de post-procesado
+export const POST_PROCESSING_OPTIONS = [
+  { id: "bloom", nombre: "Bloom", desc: "Efecto de brillo luminoso" },
+  { id: "fxaa", nombre: "FXAA", desc: "Anti-aliasing para bordes suaves" },
+  { id: "toneMapping", nombre: "Tone Mapping", desc: "Mapeo de tonos HDR" },
+  { id: "contrast", nombre: "Alto Contraste", desc: "Aumenta el contraste global" },
+  { id: "sharpness", nombre: "Nitidez", desc: "Realza los detalles" },
 ];
 
 export const TIPOGRAFIAS = [

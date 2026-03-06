@@ -1,4 +1,4 @@
-import { Upload } from "lucide-react";
+import { Upload, Sparkles, Maximize2 } from "lucide-react";
 import {
   ESTILOS_VISUALES,
   TIPOS_LETRAS_CORPOREAS,
@@ -7,6 +7,10 @@ import {
   TIPOS_NEGOCIO_LONAS,
   ESTILOS_LONA,
   FACHADAS,
+  ACABADOS_SUPERFICIALES,
+  MODOS_ILUMINACION,
+  POST_PROCESSING_OPTIONS,
+  MATERIALES_LASER,
 } from "../data/constants";
 
 export const Paso3Estilo = ({
@@ -19,6 +23,10 @@ export const Paso3Estilo = ({
   setEspesor,
   colorLuzLed,
   setColorLuzLed,
+  materialLaser,
+  setMaterialLaser,
+  acabadoSuperficial,
+  setAcabadoSuperficial,
   tipoNegocioLona,
   setTipoNegocioLona,
   estiloLona,
@@ -27,9 +35,20 @@ export const Paso3Estilo = ({
   setFachada,
   fachadaPersonalizada,
   setFachadaPersonalizada,
+  iluminacionHDRI,
+  setIluminacionHDRI,
+  postProcessing,
+  togglePostProcessing,
+  variacionesColor,
+  setVariacionesColor,
+  isUpscaling,
+  generarVariacionesColor,
+  mejorarResolucion,
   errores,
   mostrarSelectorCorporea,
   mostrarSelectorLuzLed,
+  mostrarSelectorMaterialLaser,
+  mostrarSelectorAcabado,
   mostrarConfiguracionLona,
   getEspesoresDisponibles,
 }) => {
@@ -37,7 +56,10 @@ export const Paso3Estilo = ({
     const file = e.target.files[0];
     if (file) {
       const reader = new FileReader();
-      reader.onload = (e) => setFachadaPersonalizada(e.target.result);
+      reader.onload = (e) => {
+        setFachadaPersonalizada(e.target.result);
+        setFachada('personalizada');
+      };
       reader.readAsDataURL(file);
     }
   };
@@ -45,7 +67,7 @@ export const Paso3Estilo = ({
   return (
     <div className="paso-contenido">
       <h2 className="paso-titulo">Paso 3: Estilo y Acabado</h2>
-      <p className="paso-descripcion">Define el estilo visual y los materiales</p>
+      <p className="paso-descripcion">Define el estilo visual, materiales y efectos</p>
 
       {/* Estilo Visual */}
       <div className="form-group">
@@ -104,6 +126,45 @@ export const Paso3Estilo = ({
                 onClick={() => setEspesor(esp.valor)}
               >
                 <div className="material-nombre">{esp.label}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Acabado Superficial */}
+      {mostrarSelectorAcabado() && (
+        <div className="form-group">
+          <label className="form-label">Acabado Superficial</label>
+          <div className="material-grid">
+            {ACABADOS_SUPERFICIALES.map((acabado) => (
+              <div
+                key={acabado.id}
+                className={`material-option ${acabadoSuperficial === acabado.id ? "selected" : ""}`}
+                onClick={() => setAcabadoSuperficial(acabado.id)}
+              >
+                <div style={{ fontSize: '1.5rem', marginBottom: 4 }}>{acabado.icono}</div>
+                <div className="material-nombre">{acabado.nombre}</div>
+                <div className="material-desc" style={{ fontSize: '0.65rem', color: '#666' }}>{acabado.desc}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Material Láser (para metacrilato) */}
+      {mostrarSelectorMaterialLaser() && (
+        <div className="form-group">
+          <label className="form-label">Material Corte Láser</label>
+          <div className="material-grid">
+            {MATERIALES_LASER.map((mat) => (
+              <div
+                key={mat.id}
+                className={`material-option ${materialLaser === mat.id ? "selected" : ""}`}
+                onClick={() => setMaterialLaser(mat.id)}
+              >
+                <div className="material-nombre">{mat.nombre}</div>
+                <div className="material-desc" style={{ fontSize: '0.65rem', color: '#666' }}>{mat.desc}</div>
               </div>
             ))}
           </div>
@@ -183,6 +244,44 @@ export const Paso3Estilo = ({
         </>
       )}
 
+      {/* Iluminación HDRI */}
+      <div className="form-group">
+        <label className="form-label">Iluminación 3D</label>
+        <div className="material-grid">
+          {MODOS_ILUMINACION.map((modo) => (
+            <div
+              key={modo.id}
+              className={`material-option ${iluminacionHDRI === modo.id ? "selected" : ""}`}
+              onClick={() => setIluminacionHDRI(modo.id)}
+            >
+              <div style={{ fontSize: '1.5rem', marginBottom: 4 }}>{modo.icono}</div>
+              <div className="material-nombre">{modo.nombre}</div>
+              <div className="material-desc" style={{ fontSize: '0.65rem', color: '#666' }}>{modo.desc}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Post-Procesado 3D */}
+      <div className="form-group">
+        <label className="form-label">Efectos Visuales 3D</label>
+        <div className="checkbox-grid">
+          {POST_PROCESSING_OPTIONS.map((option) => (
+            <label key={option.id} className="checkbox-option">
+              <input
+                type="checkbox"
+                checked={postProcessing[option.id] || false}
+                onChange={() => togglePostProcessing(option.id)}
+              />
+              <span className="checkbox-label">
+                <strong>{option.nombre}</strong>
+                <small style={{ display: 'block', color: '#666', fontSize: '0.7rem' }}>{option.desc}</small>
+              </span>
+            </label>
+          ))}
+        </div>
+      </div>
+
       {/* Fachada */}
       <div className="form-group">
         <label className="form-label">Fachada para visualización</label>
@@ -236,6 +335,54 @@ export const Paso3Estilo = ({
               alt="Fachada" 
               style={{ maxHeight: 100, borderRadius: 8, border: '1px solid rgba(255,255,255,0.1)' }} 
             />
+          </div>
+        )}
+      </div>
+
+      {/* Botones de acción: Variaciones y Upscale */}
+      <div className="form-group">
+        <label className="form-label">Opciones Avanzadas</label>
+        <div className="action-buttons">
+          <button 
+            className="action-btn"
+            onClick={generarVariacionesColor}
+            disabled={variacionesColor.length > 0}
+          >
+            <Sparkles size={18} />
+            <span>Generar Variaciones de Color</span>
+          </button>
+          
+          <button 
+            className="action-btn secondary"
+            onClick={mejorarResolucion}
+            disabled={isUpscaling}
+          >
+            <Maximize2 size={18} />
+            <span>{isUpscaling ? 'Mejorando...' : 'Mejorar Resolución 4x'}</span>
+          </button>
+        </div>
+
+        {/* Mostrar variaciones generadas */}
+        {variacionesColor.length > 0 && (
+          <div className="variaciones-grid" style={{ marginTop: 16 }}>
+            <label className="form-label" style={{ fontSize: '0.8rem' }}>Variaciones generadas:</label>
+            <div className="fachada-grid">
+              {variacionesColor.map((varColor) => (
+                <div
+                  key={varColor.id}
+                  className="fachada-card"
+                  onClick={() => setVariacionesColor([])}
+                >
+                  <div 
+                    className="fachada-preview"
+                    style={{ 
+                      background: `linear-gradient(135deg, ${varColor.colores[0]?.hex || '#ff6b00'}, ${varColor.colores[1]?.hex || '#ff8533'})` 
+                    }} 
+                  />
+                  <div className="fachada-nombre">Variante {varColor.id + 1}</div>
+                </div>
+              ))}
+            </div>
           </div>
         )}
       </div>

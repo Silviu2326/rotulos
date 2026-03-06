@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from "react";
+import React, { useState, useMemo, useEffect, useRef, useCallback } from "react";
 import {
   Palette,
   Ruler,
@@ -22,9 +22,357 @@ import {
   ExternalLink,
   ArrowLeft,
   X,
+  Droplet,
+  Layers,
+  Sun,
+  Sparkles,
+  Scissors,
+  Image as ImageIcon,
 } from "lucide-react";
 import { useEditorConfig } from "../hooks/useEditorConfig";
+import {
+  PROMPTS_CATEGORIA,
+  PROMPTS_NEGOCIO,
+  getMejoraAleatoria,
+  generarDescripcionMejorada,
+} from "../data/prompts";
+import {
+  IlustracionCategoria,
+  GaleriaCorporeas,
+  MuestrasColorLED,
+  MuestrasMaterialLaser,
+  IconosNegocioLona,
+  BannerEjemplo,
+} from "../components/IlustracionProducto";
 import "../styles/rotularte.css";
+
+// ============================================
+// COMPONENTE: COLOR PICKER HSB PROFESIONAL
+// ============================================
+const ColorPickerHSB = ({ selectedColors, onAddColor, onRemoveColor }) => {
+  const [activeTab, setActiveTab] = useState("visualizer");
+  const [hue, setHue] = useState(0);
+  const [saturation, setSaturation] = useState(100);
+  const [brightness, setBrightness] = useState(100);
+  const [hexValue, setHexValue] = useState("#FF0000");
+  const gradientRef = useRef(null);
+  const hueRef = useRef(null);
+
+  const hsbToHex = (h, s, b) => {
+    const sNorm = s / 100;
+    const bNorm = b / 100;
+    const k = (n) => (n + h / 60) % 6;
+    const f = (n) => bNorm * (1 - sNorm * Math.max(0, Math.min(k(n), 4 - k(n), 1)));
+    const r = Math.round(f(5) * 255);
+    const g = Math.round(f(3) * 255);
+    const bVal = Math.round(f(1) * 255);
+    return `#${r.toString(16).padStart(2, "0")}${g.toString(16).padStart(2, "0")}${bVal.toString(16).padStart(2, "0")}`.toUpperCase();
+  };
+
+  const hexToHsb = (hex) => {
+    const r = parseInt(hex.slice(1, 3), 16) / 255;
+    const g = parseInt(hex.slice(3, 5), 16) / 255;
+    const b = parseInt(hex.slice(5, 7), 16) / 255;
+    const max = Math.max(r, g, b);
+    const min = Math.min(r, g, b);
+    const bVal = max;
+    const s = max === 0 ? 0 : (max - min) / max;
+    let h = 0;
+    if (max !== min) {
+      if (max === r) h = (g - b) / (max - min) + (g < b ? 6 : 0);
+      else if (max === g) h = (b - r) / (max - min) + 2;
+      else h = (r - g) / (max - min) + 4;
+      h *= 60;
+    }
+    return { h, s: s * 100, b: bVal * 100 };
+  };
+
+  useEffect(() => {
+    setHexValue(hsbToHex(hue, saturation, brightness));
+  }, [hue, saturation, brightness]);
+
+  const handleGradientClick = (e) => {
+    if (!gradientRef.current) return;
+    const rect = gradientRef.current.getBoundingClientRect();
+    const x = (e.clientX - rect.left) / rect.width;
+    const y = (e.clientY - rect.top) / rect.height;
+    setSaturation(x * 100);
+    setBrightness((1 - y) * 100);
+  };
+
+  const handleHueClick = (e) => {
+    if (!hueRef.current) return;
+    const rect = hueRef.current.getBoundingClientRect();
+    const x = (e.clientX - rect.left) / rect.width;
+    setHue(x * 360);
+  };
+
+  const pantoneColors = [
+    { hex: "#DA291C", name: "Rojo intenso" },
+    { hex: "#E4002B", name: "Rojo brillante" },
+    { hex: "#CE0058", name: "Magenta" },
+    { hex: "#FF6900", name: "Naranja" },
+    { hex: "#FEDD00", name: "Amarillo" },
+    { hex: "#FFD100", name: "Dorado" },
+    { hex: "#00A651", name: "Verde" },
+    { hex: "#00B388", name: "Verde menta" },
+    { hex: "#00A3E0", name: "Azul cielo" },
+    { hex: "#0033A0", name: "Azul royal" },
+    { hex: "#002855", name: "Azul marino" },
+    { hex: "#6D2077", name: "Púrpura" },
+    { hex: "#FFFFFF", name: "Blanco" },
+    { hex: "#F5F5F5", name: "Gris claro" },
+    { hex: "#888B8D", name: "Gris" },
+    { hex: "#1D1D1D", name: "Negro" },
+    { hex: "#D4AF37", name: "Dorado metalizado", gradient: "linear-gradient(135deg, #D4AF37, #FFD700, #B8860B)" },
+    { hex: "#C0C0C0", name: "Plateado metalizado", gradient: "linear-gradient(135deg, #C0C0C0, #FFFFFF, #A8A8A8)" },
+  ];
+
+  return (
+    <div className="color-picker-hsb">
+      <div className="color-picker-tabs">
+        <button
+          className={`color-picker-tab ${activeTab === "visualizer" ? "active" : ""}`}
+          onClick={() => setActiveTab("visualizer")}
+        >
+          🎨 Visualizador
+        </button>
+        <button
+          className={`color-picker-tab ${activeTab === "palettes" ? "active" : ""}`}
+          onClick={() => setActiveTab("palettes")}
+        >
+          📋 Paletas
+        </button>
+      </div>
+
+      {activeTab === "visualizer" ? (
+        <div className="color-tab-content">
+          <div
+            ref={gradientRef}
+            className="color-gradient-box"
+            style={{ background: `hsl(${hue}, 100%, 50%)` }}
+            onClick={handleGradientClick}
+          >
+            <div
+              className="color-gradient-overlay"
+              style={{
+                background: `linear-gradient(to right, white, transparent)`,
+              }}
+            />
+            <div
+              className="color-gradient-overlay"
+              style={{
+                background: `linear-gradient(to top, black, transparent)`,
+              }}
+            />
+            <div
+              className="color-picker-cursor"
+              style={{
+                left: `${saturation}%`,
+                top: `${100 - brightness}%`,
+                background: hexValue,
+              }}
+            />
+          </div>
+          <div
+            ref={hueRef}
+            className="color-hue-slider"
+            onClick={handleHueClick}
+          >
+            <div
+              className="hue-slider-thumb"
+              style={{ left: `${(hue / 360) * 100}%` }}
+            />
+          </div>
+          <div className="color-preview-row">
+            <div
+              className="color-preview-swatch"
+              style={{ background: hexValue }}
+            />
+            <input
+              type="text"
+              className="color-hex-input"
+              value={hexValue}
+              onChange={(e) => {
+                const val = e.target.value;
+                setHexValue(val);
+                if (/^#[0-9A-F]{6}$/i.test(val)) {
+                  const hsb = hexToHsb(val);
+                  setHue(hsb.h);
+                  setSaturation(hsb.s);
+                  setBrightness(hsb.b);
+                }
+              }}
+              maxLength={7}
+            />
+            <button
+              className="btn-add-color"
+              onClick={() => onAddColor(hexValue)}
+            >
+              + Añadir
+            </button>
+          </div>
+        </div>
+      ) : (
+        <div className="color-tab-content">
+          <div className="pantone-palette">
+            <div className="pantone-row">
+              {pantoneColors.slice(0, 6).map((c) => (
+                <button
+                  key={c.hex}
+                  className="color-swatch"
+                  style={{
+                    background: c.gradient || c.hex,
+                    border: c.hex === "#FFFFFF" ? "1px solid #333" : undefined,
+                  }}
+                  title={c.name}
+                  onClick={() => onAddColor(c.hex)}
+                />
+              ))}
+            </div>
+            <div className="pantone-row">
+              {pantoneColors.slice(6, 12).map((c) => (
+                <button
+                  key={c.hex}
+                  className="color-swatch"
+                  style={{
+                    background: c.gradient || c.hex,
+                    border: c.hex === "#FFFFFF" ? "1px solid #333" : undefined,
+                  }}
+                  title={c.name}
+                  onClick={() => onAddColor(c.hex)}
+                />
+              ))}
+            </div>
+            <div className="pantone-row">
+              {pantoneColors.slice(12).map((c) => (
+                <button
+                  key={c.hex}
+                  className="color-swatch"
+                  style={{
+                    background: c.gradient || c.hex,
+                    border: c.hex === "#FFFFFF" ? "1px solid #333" : undefined,
+                  }}
+                  title={c.name}
+                  onClick={() => onAddColor(c.hex)}
+                />
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Colores seleccionados */}
+      {selectedColors.length > 0 && (
+        <div className="selected-colors">
+          {selectedColors.map((color, idx) => (
+            <div key={idx} className="selected-color-chip">
+              <div
+                className="color-dot"
+                style={{ background: color }}
+              />
+              <span>{color}</span>
+              <button
+                className="remove-color"
+                onClick={() => onRemoveColor(idx)}
+              >
+                ×
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
+
+// ============================================
+// COMPONENTE: SELECTOR DE TIPO CORPÓREA
+// ============================================
+const CORPOTYPES = [
+  { id: "aluminio-sin-luz", name: "Aluminio\nsin luz", icon: "🔩" },
+  { id: "pvc", name: "PVC\nfresado", icon: "🎨" },
+  { id: "aluminio-con-luz", name: "Aluminio\ncon luz", icon: "💡" },
+  { id: "pvc-retroiluminadas", name: "PVC\nretroiluminado", icon: "✨" },
+  { id: "metacrilato", name: "Metacrilato\nacrílico", icon: "💎" },
+  { id: "pvc-impreso-uv", name: "PVC impreso\nUV", icon: "🖨️" },
+  { id: "aluminio-retroiluminada", name: "Aluminio\nretroiluminado", icon: "🌟" },
+  { id: "dibond-sin-relieve", name: "Dibond\nsin relieve", icon: "📐" },
+];
+
+const RELIEF_OPTIONS = {
+  "aluminio-sin-luz": ["3cm", "5cm", "8cm", "10cm"],
+  "pvc": ["2cm", "3cm", "5cm", "8cm", "10cm", "15cm", "20cm"],
+  "aluminio-con-luz": ["5cm", "8cm", "10cm"],
+  "pvc-retroiluminadas": ["5cm", "8cm", "10cm", "15cm"],
+  "metacrilato": ["2cm", "3cm", "5cm", "8cm", "10cm", "15cm", "20cm"],
+  "pvc-impreso-uv": ["Sin relieve", "2cm", "3cm", "5cm"],
+  "aluminio-retroiluminada": ["5cm", "8cm", "10cm"],
+  "dibond-sin-relieve": ["Sin relieve"],
+};
+
+// ============================================
+// COMPONENTE: COLOR DE LUZ LED
+// ============================================
+const LED_COLORS = [
+  { id: "blanco-calido", name: "Blanco\ncálido", color: "#FFF5E6" },
+  { id: "blanco-frio", name: "Blanco\nfrío", color: "#E6F3FF" },
+  { id: "rojo", name: "Rojo", color: "#FF3333" },
+  { id: "verde", name: "Verde", color: "#33FF33" },
+  { id: "azul-celeste", name: "Celeste", color: "#33CCFF" },
+  { id: "azul", name: "Azul", color: "#3333FF" },
+  { id: "naranja", name: "Naranja", color: "#FF9933" },
+  { id: "amarillo", name: "Amarillo", color: "#FFFF33" },
+  { id: "rosa", name: "Rosa", color: "#FF33CC" },
+  { id: "morado", name: "Morado", color: "#9933FF" },
+];
+
+// ============================================
+// COMPONENTE: MATERIAL CORTE LÁSER
+// ============================================
+const LASER_MATERIALS = [
+  { id: "transparente", name: "METACRILATO\nTRANSPARENTE", style: { background: "linear-gradient(135deg, #e0f7fa, #fff)", border: "2px solid #b2ebf2" } },
+  { id: "blanco", name: "METACRILATO\nBLANCO", style: { background: "#fafafa", border: "2px solid #e0e0e0" } },
+  { id: "mdf", name: "MDF", style: { background: "#a1887f", border: "2px solid #8d6e63" } },
+  { id: "oro-espejo", name: "METACRILATO\nORO ESPEJO", style: { background: "linear-gradient(135deg, #d4af37, #ffd700, #b8860b)", border: "2px solid #c9a227" } },
+  { id: "plata-espejo", name: "METACRILATO\nPLATA ESPEJO", style: { background: "linear-gradient(135deg, #c0c0c0, #ffffff, #a8a8a8)", border: "2px solid #9e9e9e" } },
+  { id: "rosa-espejo", name: "METACRILATO\nROSA ESPEJO", style: { background: "linear-gradient(135deg, #f8bbd9, #fce4ec, #f48fb1)", border: "2px solid #f06292" } },
+];
+
+// ============================================
+// COMPONENTE: CONFIGURACIÓN LONAS
+// ============================================
+const LONA_BUSINESS_TYPES = [
+  { id: "bar", name: "Bar", icon: "🍺" },
+  { id: "restaurante", name: "Restaurante", icon: "🍽️" },
+  { id: "tienda", name: "Tienda", icon: "🛍️" },
+  { id: "peluqueria", name: "Peluquería", icon: "💈" },
+  { id: "gimnasio", name: "Gimnasio", icon: "💪" },
+  { id: "oficina", name: "Oficina", icon: "💼" },
+  { id: "taller", name: "Taller", icon: "🔧" },
+  { id: "clinica", name: "Clínica", icon: "🏥" },
+  { id: "cafeteria", name: "Cafetería", icon: "☕" },
+  { id: "panaderia", name: "Panadería", icon: "🥖" },
+  { id: "floristeria", name: "Floristería", icon: "🌸" },
+  { id: "tienda-mascotas", name: "Mascotas", icon: "🐾" },
+  { id: "tienda-ropa", name: "Ropa", icon: "👕" },
+  { id: "ferreteria", name: "Ferretería", icon: "🔨" },
+  { id: "optica", name: "Óptica", icon: "👓" },
+  { id: "farmacia", name: "Farmacia", icon: "💊" },
+];
+
+const LONA_STYLES = [
+  { id: "festivo", name: "Festivo", preview: "linear-gradient(135deg, #ff6b6b, #feca57)" },
+  { id: "elegante", name: "Elegante", preview: "linear-gradient(135deg, #2c3e50, #bdc3c7)" },
+  { id: "retro", name: "Retro", preview: "linear-gradient(135deg, #f39c12, #e74c3c)" },
+  { id: "moderno", name: "Moderno", preview: "linear-gradient(135deg, #3498db, #2ecc71)" },
+  { id: "natural", name: "Natural", preview: "linear-gradient(135deg, #27ae60, #16a085)" },
+  { id: "urbano", name: "Urbano", preview: "linear-gradient(135deg, #34495e, #95a5a6)" },
+  { id: "playa", name: "Playa", preview: "linear-gradient(135deg, #00d2ff, #3a7bd5)" },
+  { id: "minimalista", name: "Minimal", preview: "linear-gradient(135deg, #ecf0f1, #bdc3c7)" },
+  { id: "industrial", name: "Industrial", preview: "linear-gradient(135deg, #7f8c8d, #2c3e50)" },
+  { id: "vintage", name: "Vintage", preview: "linear-gradient(135deg, #d35400, #c0392b)" },
+];
 
 // Componente para el ColorPicker/ThemeSelector
 const ColorPicker = ({ currentTheme, setTheme, currentColor, setColor }) => {
@@ -268,6 +616,22 @@ const ROTULO_TYPES = [
     price: "Desde €180",
     popular: false,
   },
+  {
+    id: "lonas",
+    name: "Lonas y Pancartas",
+    icon: Layout,
+    description: "Ideal para eventos y promociones",
+    price: "Desde €89",
+    popular: false,
+  },
+  {
+    id: "neon",
+    name: "Neón LED",
+    icon: Sparkles,
+    description: "Neones realistas con tubos de vidrio brillantes",
+    price: "Desde €350",
+    popular: true,
+  },
 ];
 
 const MATERIALS = [
@@ -317,6 +681,18 @@ const FONTS = [
   { id: "minimal", name: "Minimalista", sample: "Clean" },
 ];
 
+const ESTILOS = [
+  { id: "moderno", name: "Moderno" },
+  { id: "clasico", name: "Clásico" },
+  { id: "elegante", name: "Elegante" },
+  { id: "minimalista", name: "Minimalista" },
+  { id: "llamativo", name: "Llamativo" },
+  { id: "industrial", name: "Industrial" },
+  { id: "vintage", name: "Vintage" },
+  { id: "neon", name: "Neón" },
+  { id: "luxury", name: "Luxury" },
+];
+
 export default function EditorPage({ standalone = false }) {
   const { config, getActiveSteps, isStepEnabled, getCustomFields } =
     useEditorConfig();
@@ -330,7 +706,11 @@ export default function EditorPage({ standalone = false }) {
     () => localStorage.getItem("rotularte-color") || "#ff6b00",
   );
 
+  // ============================================
+  // ESTADO: FormData con todos los campos nuevos
+  // ============================================
   const [formData, setFormData] = useState({
+    // Campos originales
     tipo: "",
     material: "",
     ancho: 100,
@@ -341,11 +721,38 @@ export default function EditorPage({ standalone = false }) {
     colorTexto: "black",
     iluminacion: false,
     instalacion: false,
-    // Campos personalizados se inicializan dinámicamente
+    
+    // Campos nuevos del PHP
+    textoAdicional: "",
+    logo: null,
+    estilo: "moderno",
+    orientacion: "horizontal",
+    
+    // Corpóreas
+    corporeaTipo: "aluminio-sin-luz",
+    corporeaRelieve: "5cm",
+    
+    // Iluminación LED
+    ledColor: "blanco-calido",
+    
+    // Material corte láser
+    laserMaterial: "transparente",
+    
+    // Lonas
+    lonaBusinessType: "",
+    lonaStyle: "moderno",
+    
+    // Colores HSB
+    coloresSeleccionados: [],
+    
+    // Descripción para IA
+    descripcion: "",
+    
+    // Campos personalizados
     customFields: {},
   });
 
-  // Inicializar campos personalizados vacíos
+  // Inicializar campos personalizados
   useEffect(() => {
     const customFields = getCustomFields();
     if (customFields.length > 0) {
@@ -368,7 +775,6 @@ export default function EditorPage({ standalone = false }) {
     document.documentElement.style.setProperty("--color-neon", neonColor);
     document.documentElement.style.setProperty("--color-neon-glow", neonColor);
 
-    // Forzar todos los colores según el tema seleccionado
     const themeConfig = {
       industrial: {
         bg: "#0a0a0a",
@@ -412,31 +818,21 @@ export default function EditorPage({ standalone = false }) {
       },
     };
 
-    const config = themeConfig[theme] || themeConfig.industrial;
+    const t = themeConfig[theme] || themeConfig.industrial;
+    document.documentElement.style.setProperty("--color-bg", t.bg);
+    document.documentElement.style.setProperty("--color-bg-alt", t.bgAlt);
+    document.documentElement.style.setProperty("--color-accent", t.accent);
+    document.documentElement.style.setProperty("--color-text", t.text);
+    document.documentElement.style.setProperty("--color-text-muted", t.textMuted);
+    document.documentElement.style.setProperty("--color-metal", t.metal);
 
-    // Aplicar todas las variables de color
-    document.documentElement.style.setProperty("--color-bg", config.bg);
-    document.documentElement.style.setProperty("--color-bg-alt", config.bgAlt);
-    document.documentElement.style.setProperty("--color-accent", config.accent);
-    document.documentElement.style.setProperty("--color-text", config.text);
-    document.documentElement.style.setProperty(
-      "--color-text-muted",
-      config.textMuted,
-    );
-    document.documentElement.style.setProperty("--color-metal", config.metal);
-
-    // Guardar preferencias
     localStorage.setItem("rotularte-theme", theme);
     localStorage.setItem("rotularte-color", neonColor);
   }, [theme, neonColor]);
 
-  // Obtener pasos activos ordenados según configuración
   const activeSteps = useMemo(() => getActiveSteps(), [getActiveSteps]);
-
-  // Obtener campos personalizados
   const customFields = useMemo(() => getCustomFields(), [getCustomFields]);
 
-  // Crear array de STEPS basado en la configuración
   const STEPS = useMemo(() => {
     return activeSteps.map((step, index) => ({
       id: index + 1,
@@ -480,6 +876,12 @@ export default function EditorPage({ standalone = false }) {
       case "bandera":
         base = 180;
         break;
+      case "lonas":
+        base = 89;
+        break;
+      case "neon":
+        base = 350;
+        break;
       default:
         base = 0;
     }
@@ -507,7 +909,6 @@ export default function EditorPage({ standalone = false }) {
     return Math.round(base + area * 50 * materialMultiplier + extras);
   };
 
-  // Actualizar valor de campo personalizado
   const updateCustomField = (fieldName, value) => {
     setFormData((prev) => ({
       ...prev,
@@ -516,6 +917,33 @@ export default function EditorPage({ standalone = false }) {
         [fieldName]: value,
       },
     }));
+  };
+
+  const handleAddColor = (color) => {
+    if (!formData.coloresSeleccionados.includes(color)) {
+      setFormData((prev) => ({
+        ...prev,
+        coloresSeleccionados: [...prev.coloresSeleccionados, color],
+      }));
+    }
+  };
+
+  const handleRemoveColor = (index) => {
+    setFormData((prev) => ({
+      ...prev,
+      coloresSeleccionados: prev.coloresSeleccionados.filter((_, i) => i !== index),
+    }));
+  };
+
+  const handleLogoUpload = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        updateFormData("logo", event.target.result);
+      };
+      reader.readAsDataURL(file);
+    }
   };
 
   // Renderizar campo personalizado
@@ -690,6 +1118,22 @@ export default function EditorPage({ standalone = false }) {
 
   // ==================== RENDERIZADO DE SECCIONES ====================
 
+  // Mapeo de imágenes para el paso 1
+  const TYPE_IMAGES = {
+    'rotulos': '/img/rotulemos-rotulo-luminoso.webp',
+    'letras-neon': '/img/rotulo-de-neon-.webp',
+    'letras-corporeas': '/img/letras-retroiluminadas.webp',
+    'lonas-pancartas': '/img/lonas-y-pancartas-publicitarias-comprar.webp',
+    'vinilos': '/img/vinilo-miccroperforado.webp',
+    'banderolas': '/img/banderola-luminosa.webp',
+    'rigidos-impresos': '/img/PVC-FOREX.webp',
+    'rollup': '/img/ROLL-UP-DISPLAY.jpg',
+    'photocall': '/img/photocall-pop-up.jpg',
+    'carteles-inmobiliarios': '/img/carteles-inmobiliaria.webp',
+    'mupis': '/img/mupi-publicitario.webp',
+    'flybanner': '/img/fly-banneer.webp'
+  };
+
   const renderTypeSection = () => (
     <div className="wizard-content">
       <h3 className="wizard-title">Selecciona el tipo de rótulo</h3>
@@ -701,6 +1145,7 @@ export default function EditorPage({ standalone = false }) {
         {ROTULO_TYPES.map((tipo) => {
           const TypeIcon = tipo.icon;
           const isSelected = formData.tipo === tipo.id;
+          const imageUrl = TYPE_IMAGES[tipo.id];
 
           return (
             <button
@@ -711,14 +1156,23 @@ export default function EditorPage({ standalone = false }) {
               {tipo.popular && (
                 <span className="wizard-card-badge">Popular</span>
               )}
-              <div className="wizard-card-icon">
-                <TypeIcon size={32} />
+              {/* Imagen del producto */}
+              <div className="wizard-card-image">
+                <img 
+                  src={imageUrl} 
+                  alt={tipo.name}
+                  onError={(e) => {
+                    // Si falla la imagen, mostrar el icono
+                    e.target.style.display = 'none';
+                    e.target.nextSibling.style.display = 'flex';
+                  }}
+                />
+                <div className="wizard-card-icon fallback-icon" style={{ display: 'none' }}>
+                  <TypeIcon size={32} />
+                </div>
               </div>
               <h4 className="wizard-card-title">{tipo.name}</h4>
               <p className="wizard-card-description">{tipo.description}</p>
-              {config.showPricePreview && (
-                <span className="wizard-card-price">{tipo.price}</span>
-              )}
             </button>
           );
         })}
@@ -764,6 +1218,29 @@ export default function EditorPage({ standalone = false }) {
             <span>cm</span>
           </div>
         </div>
+        
+        {/* Selector de orientación */}
+        <div style={{ marginTop: "1rem" }}>
+          <label style={{ fontSize: "0.85rem", color: "var(--text-secondary)", marginBottom: "0.5rem", display: "block" }}>
+            📐 Orientación del diseño:
+          </label>
+          <div className="style-pills">
+            {[
+              { id: "horizontal", name: "↔️ Horizontal" },
+              { id: "vertical", name: "↕️ Vertical" },
+              { id: "cuadrado", name: "⬜ Cuadrado" },
+            ].map((o) => (
+              <button
+                key={o.id}
+                className={`style-pill ${formData.orientacion === o.id ? "active" : ""}`}
+                onClick={() => updateFormData("orientacion", o.id)}
+              >
+                {o.name}
+              </button>
+            ))}
+          </div>
+        </div>
+        
         <div className="wizard-dimension-preview">
           <div
             className="wizard-preview-box"
@@ -829,6 +1306,69 @@ export default function EditorPage({ standalone = false }) {
         </span>
       </div>
 
+      {/* Texto adicional */}
+      <div className="wizard-section">
+        <label className="wizard-label">
+          Texto adicional <small>(teléfono, eslogan...)</small>
+        </label>
+        <input
+          type="text"
+          className="wizard-text-input"
+          placeholder="Ej: Tel: 666 777 888, Desde 1990..."
+          value={formData.textoAdicional}
+          onChange={(e) => updateFormData("textoAdicional", e.target.value)}
+          maxLength={100}
+        />
+      </div>
+
+      {/* Upload de logo */}
+      <div className="wizard-section">
+        <h4 className="wizard-section-title">Logo existente <small>(opcional)</small></h4>
+        <div className="image-upload-large">
+          <input
+            type="file"
+            accept="image/*"
+            onChange={handleLogoUpload}
+            style={{ display: "none" }}
+            id="logo-upload"
+          />
+          <label htmlFor="logo-upload" style={{ cursor: "pointer", width: "100%" }}>
+            {formData.logo ? (
+              <div className="upload-preview" style={{ display: "inline-block", position: "relative" }}>
+                <img src={formData.logo} alt="Logo" style={{ maxWidth: "100px", maxHeight: "100px", borderRadius: "8px" }} />
+                <button
+                  className="upload-remove"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    updateFormData("logo", null);
+                  }}
+                  style={{
+                    position: "absolute",
+                    top: "-8px",
+                    right: "-8px",
+                    background: "#ef4444",
+                    color: "white",
+                    border: "none",
+                    borderRadius: "50%",
+                    width: "24px",
+                    height: "24px",
+                    cursor: "pointer",
+                  }}
+                >
+                  ×
+                </button>
+              </div>
+            ) : (
+              <div className="upload-placeholder">
+                <ImageIcon size={32} />
+                <span>Subir mi logo</span>
+                <small>PNG o JPG - Se integrará en el diseño</small>
+              </div>
+            )}
+          </label>
+        </div>
+      </div>
+
       {config.enableImageUpload && (
         <div className="wizard-section">
           <h4 className="wizard-section-title">Subir diseño propio</h4>
@@ -868,14 +1408,95 @@ export default function EditorPage({ standalone = false }) {
           })}
         </div>
       </div>
+
+      {/* Descripción para IA */}
+      <div className="wizard-section">
+        <h4 className="wizard-section-title">Describe tu diseño</h4>
+        <div className="textarea-wrap">
+          <textarea
+            className="wizard-textarea"
+            placeholder="Ej: Logo de tijeras elegante, letras cursivas brillantes..."
+            value={formData.descripcion}
+            onChange={(e) => updateFormData("descripcion", e.target.value)}
+            rows={4}
+          />
+          <button
+            type="button"
+            className="btn-improve"
+            onClick={() => {
+              if (!formData.descripcion.trim()) {
+                alert("Por favor, escribe una descripción primero");
+                return;
+              }
+              const mejorada = generarDescripcionMejorada(
+                formData.descripcion,
+                formData.tipo,
+                formData.estilo,
+                formData.lonaBusinessType
+              );
+              updateFormData("descripcion", mejorada);
+            }}
+            disabled={!formData.descripcion.trim()}
+          >
+            <Sparkles size={16} />
+            Mejorar con IA
+          </button>
+        </div>
+        
+        {/* Información de prompts disponibles */}
+        {formData.tipo && (
+          <div className="prompt-info" style={{ 
+            marginTop: "0.75rem", 
+            padding: "0.75rem", 
+            background: "var(--color-bg)", 
+            border: "1px solid var(--color-metal)",
+            fontSize: "0.8rem",
+            color: "var(--color-text-muted)"
+          }}>
+            <strong style={{ color: "var(--color-neon)" }}>
+              {PROMPTS_CATEGORIA[formData.tipo]?.contexto || "Rótulo personalizado"}
+            </strong>
+            <p style={{ margin: "0.25rem 0 0" }}>
+              Estilo {formData.estilo}: {getDescripcionEstilo(formData.tipo, formData.estilo)}
+            </p>
+          </div>
+        )}
+      </div>
     </div>
   );
 
   const renderColorsSection = () => (
     <div className="wizard-content">
-      <h3 className="wizard-title">Colores y acabados</h3>
+      <h3 className="wizard-title">Colores, estilo y acabados</h3>
       <p className="wizard-subtitle">Personaliza los colores y añade extras</p>
 
+      {/* Color Picker HSB Profesional */}
+      <div className="wizard-section">
+        <h4 className="wizard-section-title">🎨 Colores del diseño</h4>
+        <ColorPickerHSB
+          selectedColors={formData.coloresSeleccionados}
+          onAddColor={handleAddColor}
+          onRemoveColor={handleRemoveColor}
+        />
+      </div>
+
+      {/* Estilos */}
+      <div className="wizard-section">
+        <h4 className="wizard-section-title">Estilo visual</h4>
+        <div className="style-pills">
+          {ESTILOS.map((estilo) => (
+            <button
+              key={estilo.id}
+              className={`style-pill ${formData.estilo === estilo.id ? "active" : ""}`}
+              onClick={() => updateFormData("estilo", estilo.id)}
+            >
+              {estilo.name}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Colores básicos (originales) */}
       <div className="wizard-section">
         <h4 className="wizard-section-title">Color de fondo</h4>
         <div className="wizard-colors">
@@ -919,6 +1540,122 @@ export default function EditorPage({ standalone = false }) {
           ))}
         </div>
       </div>
+
+      {/* Selector de tipos corpóreas (solo visible si tipo es corpóreas) */}
+      {formData.tipo === "corporeas" && (
+        <>
+          <div className="wizard-section">
+            <h4 className="wizard-section-title">🔤 Tipo de letra corpórea</h4>
+            <div className="corporea-types-grid">
+              {CORPOTYPES.map((tipo) => (
+                <button
+                  key={tipo.id}
+                  className={`corporea-type-btn ${formData.corporeaTipo === tipo.id ? "active" : ""}`}
+                  onClick={() => {
+                    updateFormData("corporeaTipo", tipo.id);
+                    // Set default relief for this type
+                    const defaultRelief = RELIEF_OPTIONS[tipo.id]?.[0] || "5cm";
+                    updateFormData("corporeaRelieve", defaultRelief);
+                  }}
+                >
+                  <div className="type-icon">{tipo.icon}</div>
+                  <div className="type-name">{tipo.name}</div>
+                </button>
+              ))}
+            </div>
+            
+            {/* Galería visual de ejemplos */}
+            <GaleriaCorporeas 
+              tipoSeleccionado={formData.corporeaTipo}
+              onSelect={(tipo) => {
+                updateFormData("corporeaTipo", tipo);
+                const defaultRelief = RELIEF_OPTIONS[tipo]?.[0] || "5cm";
+                updateFormData("corporeaRelieve", defaultRelief);
+              }}
+            />
+          </div>
+
+          {/* Selector de relieve/espesor */}
+          <div className="wizard-section">
+            <h4 className="wizard-section-title">📏 Espesor de las letras</h4>
+            <div className="relief-options">
+              {RELIEF_OPTIONS[formData.corporeaTipo]?.map((relieve) => (
+                <button
+                  key={relieve}
+                  className={`relief-option ${formData.corporeaRelieve === relieve ? "active" : ""}`}
+                  onClick={() => updateFormData("corporeaRelieve", relieve)}
+                >
+                  <div className="relief-value">{relieve}</div>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Color de luz LED (para tipos iluminados) */}
+          {(formData.corporeaTipo?.includes("luz") || formData.corporeaTipo?.includes("retro")) && (
+            <div className="wizard-section">
+              <h4 className="wizard-section-title">💡 Color de luz LED</h4>
+              <p className="text-sm text-gray-500 mb-2">Selecciona el color de iluminación</p>
+              <MuestrasColorLED 
+                colorSeleccionado={formData.ledColor}
+                onSelect={(color) => updateFormData("ledColor", color)}
+              />
+            </div>
+          )}
+
+          {/* Material corte láser (solo para metacrilato) */}
+          {formData.corporeaTipo === "metacrilato" && (
+            <div className="wizard-section">
+              <h4 className="wizard-section-title">✂️ Material corte láser</h4>
+              <p className="text-sm text-gray-500 mb-2">Selecciona el material para el corte láser</p>
+              <MuestrasMaterialLaser 
+                materialSeleccionado={formData.laserMaterial}
+                onSelect={(material) => updateFormData("laserMaterial", material)}
+              />
+            </div>
+          )}
+        </>
+      )}
+
+      {/* Configuración especial para lonas */}
+      {formData.tipo === "lonas" && (
+        <div className="wizard-section lona-section">
+          <h4 className="wizard-section-title">🏪 Configuración de lona</h4>
+          
+          <div style={{ marginBottom: "1rem" }}>
+            <label style={{ fontSize: "0.85rem", color: "var(--text-secondary)", marginBottom: "0.5rem", display: "block" }}>
+              Tipo de negocio (para fondo temático):
+            </label>
+            <IconosNegocioLona 
+              tipoSeleccionado={formData.lonaBusinessType}
+              onSelect={(tipo) => updateFormData("lonaBusinessType", tipo)}
+            />
+          </div>
+
+          <div>
+            <label style={{ fontSize: "0.85rem", color: "var(--text-secondary)", marginBottom: "0.5rem", display: "block" }}>
+              Estilo del fondo:
+            </label>
+            <div className="lona-style-grid">
+              {LONA_STYLES.map((s) => (
+                <button
+                  key={s.id}
+                  className={`lona-style-btn ${formData.lonaStyle === s.id ? "active" : ""}`}
+                  onClick={() => updateFormData("lonaStyle", s.id)}
+                >
+                  <div className="lona-style-preview" style={{ background: s.preview }} />
+                  <div className="lona-style-name">{s.name}</div>
+                </button>
+              ))}
+            </div>
+          </div>
+          
+          <div className="lona-info-box" style={{ marginTop: "1rem" }}>
+            💡 <strong>Sistema Híbrido:</strong> La IA genera un fondo decorativo temático 
+            (sin texto), y superponemos tu texto y logo con perfección garantizada.
+          </div>
+        </div>
+      )}
 
       <div className="wizard-section">
         <h4 className="wizard-section-title">Extras</h4>
@@ -1037,6 +1774,10 @@ export default function EditorPage({ standalone = false }) {
               </span>
             </div>
             <div className="wizard-summary-item">
+              <span className="wizard-summary-label">Orientación</span>
+              <span className="wizard-summary-value">{formData.orientacion}</span>
+            </div>
+            <div className="wizard-summary-item">
               <span className="wizard-summary-label">Material</span>
               <span className="wizard-summary-value">
                 {MATERIALS.find((m) => m.id === formData.material)?.name ||
@@ -1054,6 +1795,12 @@ export default function EditorPage({ standalone = false }) {
                 {formData.texto || "Sin texto"}
               </span>
             </div>
+            {formData.textoAdicional && (
+              <div className="wizard-summary-item">
+                <span className="wizard-summary-label">Texto adicional</span>
+                <span className="wizard-summary-value">{formData.textoAdicional}</span>
+              </div>
+            )}
             <div className="wizard-summary-item">
               <span className="wizard-summary-label">Fuente</span>
               <span className="wizard-summary-value">
@@ -1064,13 +1811,43 @@ export default function EditorPage({ standalone = false }) {
         )}
 
         {isStepEnabled("colors") && (
-          <div className="wizard-summary-item">
-            <span className="wizard-summary-label">Colores</span>
-            <span className="wizard-summary-value">
-              Fondo: {COLORS.find((c) => c.id === formData.colorFondo)?.name} /
-              Texto: {COLORS.find((c) => c.id === formData.colorTexto)?.name}
-            </span>
-          </div>
+          <>
+            <div className="wizard-summary-item">
+              <span className="wizard-summary-label">Estilo</span>
+              <span className="wizard-summary-value">
+                {ESTILOS.find((e) => e.id === formData.estilo)?.name}
+              </span>
+            </div>
+            <div className="wizard-summary-item">
+              <span className="wizard-summary-label">Colores</span>
+              <span className="wizard-summary-value">
+                Fondo: {COLORS.find((c) => c.id === formData.colorFondo)?.name} /
+                Texto: {COLORS.find((c) => c.id === formData.colorTexto)?.name}
+              </span>
+            </div>
+            {formData.coloresSeleccionados.length > 0 && (
+              <div className="wizard-summary-item">
+                <span className="wizard-summary-label">Colores seleccionados</span>
+                <span className="wizard-summary-value">
+                  {formData.coloresSeleccionados.length} colores
+                </span>
+              </div>
+            )}
+            {formData.tipo === "corporeas" && (
+              <>
+                <div className="wizard-summary-item">
+                  <span className="wizard-summary-label">Tipo corpórea</span>
+                  <span className="wizard-summary-value">
+                    {CORPOTYPES.find((c) => c.id === formData.corporeaTipo)?.name.replace("\n", " ")}
+                  </span>
+                </div>
+                <div className="wizard-summary-item">
+                  <span className="wizard-summary-label">Espesor</span>
+                  <span className="wizard-summary-value">{formData.corporeaRelieve}</span>
+                </div>
+              </>
+            )}
+          </>
         )}
 
         {formData.iluminacion && (
@@ -1299,6 +2076,28 @@ export default function EditorPage({ standalone = false }) {
                   </div>
                 </div>
 
+                {/* Orientación */}
+                <div style={{ marginTop: "1rem" }}>
+                  <label style={{ fontSize: "0.75rem", color: "var(--text-secondary)", marginBottom: "0.5rem", display: "block" }}>
+                    Orientación:
+                  </label>
+                  <div className="style-pills">
+                    {[
+                      { id: "horizontal", name: "↔️ Horizontal" },
+                      { id: "vertical", name: "↕️ Vertical" },
+                      { id: "cuadrado", name: "⬜ Cuadrado" },
+                    ].map((o) => (
+                      <button
+                        key={o.id}
+                        className={`style-pill ${formData.orientacion === o.id ? "active" : ""}`}
+                        onClick={() => updateFormData("orientacion", o.id)}
+                      >
+                        {o.name}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
                 <h4 style={{ marginTop: "1rem" }}>Material</h4>
                 <select
                   className="single-sidebar-select"
@@ -1329,6 +2128,39 @@ export default function EditorPage({ standalone = false }) {
                 />
                 <small className="char-count">{formData.texto.length}/50</small>
 
+                {/* Texto adicional */}
+                <h4 style={{ marginTop: "1rem" }}>Texto adicional</h4>
+                <input
+                  type="text"
+                  className="single-sidebar-input"
+                  placeholder="Teléfono, eslogan..."
+                  value={formData.textoAdicional}
+                  onChange={(e) => updateFormData("textoAdicional", e.target.value)}
+                  maxLength={100}
+                />
+
+                {/* Logo upload */}
+                <h4 style={{ marginTop: "1rem" }}>Logo</h4>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleLogoUpload}
+                  style={{ display: "none" }}
+                  id="logo-upload-single"
+                />
+                <label htmlFor="logo-upload-single" className="upload-area" style={{ display: "block", marginTop: "0.5rem" }}>
+                  {formData.logo ? (
+                    <div className="upload-preview">
+                      <img src={formData.logo} alt="Logo" style={{ maxWidth: "70px", borderRadius: "8px" }} />
+                    </div>
+                  ) : (
+                    <>
+                      <div className="upload-icon">📤</div>
+                      <div className="upload-text">Subir mi logo</div>
+                    </>
+                  )}
+                </label>
+
                 <h4 style={{ marginTop: "1rem" }}>Tipografía</h4>
                 <div className="single-sidebar-fonts">
                   {FONTS.map((font) => {
@@ -1345,13 +2177,96 @@ export default function EditorPage({ standalone = false }) {
                     );
                   })}
                 </div>
+
+                {/* Descripción para IA */}
+                <h4 style={{ marginTop: "1rem" }}>Describe tu diseño</h4>
+                <div className="textarea-wrap" style={{ position: "relative" }}>
+                  <textarea
+                    className="single-sidebar-input"
+                    style={{ paddingBottom: "40px", minHeight: "80px", resize: "vertical" }}
+                    placeholder="Ej: Logo de tijeras elegante, letras cursivas brillantes..."
+                    value={formData.descripcion}
+                    onChange={(e) => updateFormData("descripcion", e.target.value)}
+                    rows={3}
+                  />
+                  <button
+                    type="button"
+                    className="btn-improve"
+                    style={{
+                      position: "absolute",
+                      right: "8px",
+                      bottom: "8px",
+                      background: "var(--color-neon)",
+                      border: "none",
+                      padding: "6px 12px",
+                      fontSize: "0.75rem",
+                      color: "var(--color-bg)",
+                      cursor: "pointer",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "4px",
+                      opacity: formData.descripcion.trim() ? 1 : 0.5,
+                    }}
+                    onClick={() => {
+                      if (!formData.descripcion.trim()) {
+                        alert("Por favor, escribe una descripción primero");
+                        return;
+                      }
+                      const mejorada = generarDescripcionMejorada(
+                        formData.descripcion,
+                        formData.tipo,
+                        formData.estilo,
+                        formData.lonaBusinessType
+                      );
+                      updateFormData("descripcion", mejorada);
+                    }}
+                    disabled={!formData.descripcion.trim()}
+                  >
+                    <Sparkles size={14} />
+                    Mejorar con IA
+                  </button>
+                </div>
+                
+                {/* Info de contexto del prompt */}
+                {formData.tipo && (
+                  <div style={{ 
+                    marginTop: "0.5rem", 
+                    fontSize: "0.75rem", 
+                    color: "var(--color-text-muted)",
+                    fontStyle: "italic"
+                  }}>
+                    Contexto: {PROMPTS_CATEGORIA[formData.tipo]?.contexto}
+                  </div>
+                )}
               </div>
             )}
 
-            {/* Sección Colores */}
+            {/* Sección Colores y Estilo */}
             {isStepEnabled("colors") && (
               <div className="single-sidebar-section">
-                <h4>Color de Fondo</h4>
+                {/* Color Picker HSB */}
+                <h4>🎨 Colores del diseño</h4>
+                <ColorPickerHSB
+                  selectedColors={formData.coloresSeleccionados}
+                  onAddColor={handleAddColor}
+                  onRemoveColor={handleRemoveColor}
+                />
+
+                {/* Estilo */}
+                <h4 style={{ marginTop: "1rem" }}>Estilo visual</h4>
+                <div className="style-pills">
+                  {ESTILOS.map((estilo) => (
+                    <button
+                      key={estilo.id}
+                      className={`style-pill ${formData.estilo === estilo.id ? "active" : ""}`}
+                      onClick={() => updateFormData("estilo", estilo.id)}
+                    >
+                      {estilo.name}
+                    </button>
+                  ))}
+                </div>
+
+                <h4 style={{ marginTop: "1rem" }}>Color de Fondo</h4>
                 <div className="single-sidebar-colors">
                   {COLORS.map((color) => (
                     <button
@@ -1390,6 +2305,113 @@ export default function EditorPage({ standalone = false }) {
                     </button>
                   ))}
                 </div>
+
+                {/* Corpóreas específico */}
+                {formData.tipo === "corporeas" && (
+                  <>
+                    <h4 style={{ marginTop: "1rem" }}>Tipo corpórea</h4>
+                    <div className="corporea-types-grid">
+                      {CORPOTYPES.map((tipo) => (
+                        <button
+                          key={tipo.id}
+                          className={`corporea-type-btn ${formData.corporeaTipo === tipo.id ? "active" : ""}`}
+                          onClick={() => {
+                            updateFormData("corporeaTipo", tipo.id);
+                            const defaultRelief = RELIEF_OPTIONS[tipo.id]?.[0] || "5cm";
+                            updateFormData("corporeaRelieve", defaultRelief);
+                          }}
+                        >
+                          <div className="type-icon">{tipo.icon}</div>
+                          <div className="type-name">{tipo.name}</div>
+                        </button>
+                      ))}
+                    </div>
+
+                    <h4 style={{ marginTop: "1rem" }}>Espesor</h4>
+                    <div className="relief-options">
+                      {RELIEF_OPTIONS[formData.corporeaTipo]?.map((relieve) => (
+                        <button
+                          key={relieve}
+                          className={`relief-option ${formData.corporeaRelieve === relieve ? "active" : ""}`}
+                          onClick={() => updateFormData("corporeaRelieve", relieve)}
+                        >
+                          <div className="relief-value">{relieve}</div>
+                        </button>
+                      ))}
+                    </div>
+
+                    {/* LED Color para iluminados */}
+                    {(formData.corporeaTipo.includes("luz") || formData.corporeaTipo.includes("retro")) && (
+                      <>
+                        <h4 style={{ marginTop: "1rem" }}>Color LED</h4>
+                        <div className="luz-colors-grid">
+                          {LED_COLORS.map((c) => (
+                            <button
+                              key={c.id}
+                              className={`luz-color-btn ${formData.ledColor === c.id ? "active" : ""}`}
+                              onClick={() => updateFormData("ledColor", c.id)}
+                            >
+                              <div className="luz-preview" style={{ background: c.color, boxShadow: `0 0 10px ${c.color}` }} />
+                              <div className="luz-name">{c.name}</div>
+                            </button>
+                          ))}
+                        </div>
+                      </>
+                    )}
+
+                    {/* Material láser para metacrilato */}
+                    {formData.corporeaTipo === "metacrilato" && (
+                      <>
+                        <h4 style={{ marginTop: "1rem" }}>Material láser</h4>
+                        <div className="material-laser-grid">
+                          {LASER_MATERIALS.map((m) => (
+                            <button
+                              key={m.id}
+                              className={`material-laser-btn ${formData.laserMaterial === m.id ? "active" : ""}`}
+                              onClick={() => updateFormData("laserMaterial", m.id)}
+                            >
+                              <div className="material-preview" style={m.style} />
+                              <div className="material-name">{m.name}</div>
+                            </button>
+                          ))}
+                        </div>
+                      </>
+                    )}
+                  </>
+                )}
+
+                {/* Lonas específico */}
+                {formData.tipo === "lonas" && (
+                  <>
+                    <h4 style={{ marginTop: "1rem" }}>Tipo de negocio</h4>
+                    <div className="lona-business-grid">
+                      {LONA_BUSINESS_TYPES.slice(0, 8).map((b) => (
+                        <button
+                          key={b.id}
+                          className={`lona-business-btn ${formData.lonaBusinessType === b.id ? "active" : ""}`}
+                          onClick={() => updateFormData("lonaBusinessType", b.id)}
+                        >
+                          <div className="lona-business-icon">{b.icon}</div>
+                          <div className="lona-business-name">{b.name}</div>
+                        </button>
+                      ))}
+                    </div>
+
+                    <h4 style={{ marginTop: "1rem" }}>Estilo del fondo</h4>
+                    <div className="lona-style-grid">
+                      {LONA_STYLES.slice(0, 6).map((s) => (
+                        <button
+                          key={s.id}
+                          className={`lona-style-btn ${formData.lonaStyle === s.id ? "active" : ""}`}
+                          onClick={() => updateFormData("lonaStyle", s.id)}
+                        >
+                          <div className="lona-style-preview" style={{ background: s.preview }} />
+                          <div className="lona-style-name">{s.name}</div>
+                        </button>
+                      ))}
+                    </div>
+                  </>
+                )}
               </div>
             )}
 
@@ -1490,6 +2512,19 @@ export default function EditorPage({ standalone = false }) {
               >
                 {formData.texto || "Tu texto aquí"}
               </span>
+              {formData.textoAdicional && (
+                <span
+                  style={{
+                    color: COLORS.find((c) => c.id === formData.colorTexto)?.hex,
+                    fontFamily: formData.fuente,
+                    fontSize: `${Math.min(formData.alto * 0.2, 16)}px`,
+                    marginTop: "8px",
+                    opacity: 0.8,
+                  }}
+                >
+                  {formData.textoAdicional}
+                </span>
+              )}
             </div>
           </div>
 
@@ -1508,6 +2543,16 @@ export default function EditorPage({ standalone = false }) {
                 {MATERIALS.find((m) => m.id === formData.material)?.name ||
                   "No seleccionado"}
               </span>
+            </div>
+            <div className="preview-info-item">
+              <span className="label">Estilo:</span>
+              <span className="value">
+                {ESTILOS.find((e) => e.id === formData.estilo)?.name || "Moderno"}
+              </span>
+            </div>
+            <div className="preview-info-item">
+              <span className="label">Orientación:</span>
+              <span className="value">{formData.orientacion}</span>
             </div>
             <div className="preview-info-item">
               <span className="label">Extras:</span>
@@ -1595,6 +2640,23 @@ export default function EditorPage({ standalone = false }) {
               }
             />
           </div>
+          
+          {/* Orientación */}
+          <div className="style-pills" style={{ marginTop: "0.5rem" }}>
+            {[
+              { id: "horizontal", name: "↔️" },
+              { id: "vertical", name: "↕️" },
+              { id: "cuadrado", name: "⬜" },
+            ].map((o) => (
+              <button
+                key={o.id}
+                className={`style-pill ${formData.orientacion === o.id ? "active" : ""}`}
+                onClick={() => updateFormData("orientacion", o.id)}
+              >
+                {o.name}
+              </button>
+            ))}
+          </div>
         </div>
 
         {/* Texto */}
@@ -1605,6 +2667,17 @@ export default function EditorPage({ standalone = false }) {
             placeholder="Escribe el texto..."
             value={formData.texto}
             onChange={(e) => updateFormData("texto", e.target.value)}
+          />
+        </div>
+
+        {/* Texto adicional */}
+        <div className="simplified-section">
+          <label>Texto adicional <small>(opcional)</small></label>
+          <input
+            type="text"
+            placeholder="Teléfono, eslogan..."
+            value={formData.textoAdicional}
+            onChange={(e) => updateFormData("textoAdicional", e.target.value)}
           />
         </div>
 
@@ -1620,6 +2693,19 @@ export default function EditorPage({ standalone = false }) {
               <option key={m.id} value={m.id}>
                 {m.name}
               </option>
+            ))}
+          </select>
+        </div>
+
+        {/* Estilo */}
+        <div className="simplified-section">
+          <label>Estilo</label>
+          <select
+            value={formData.estilo}
+            onChange={(e) => updateFormData("estilo", e.target.value)}
+          >
+            {ESTILOS.map((e) => (
+              <option key={e.id} value={e.id}>{e.name}</option>
             ))}
           </select>
         </div>

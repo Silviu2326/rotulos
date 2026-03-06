@@ -441,3 +441,89 @@ header.sticky.scrolled {
     0 4px 6px -1px rgba(0, 0, 0, 0.1),
     0 2px 4px -1px rgba(0, 0, 0, 0.06);
 }
+$(Get-Content mi-proyecto-react/src/style.css -Raw)
+
+/* ========================================
+   ANIMACIONES PARA VISOR 3D
+   ======================================== */
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Canvas de Three.js */
+canvas {
+  touch-action: none;
+}
+
+/* Controles del visor 3D */
+.visor-3d-controls {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  z-index: 100;
+  background: rgba(0, 0, 0, 0.7);
+  padding: 15px;
+  border-radius: 8px;
+  color: white;
+  font-size: 0.85rem;
+}
+
+/* Loading spinner mejorado */
+.spinner-3d {
+  width: 50px;
+  height: 50px;
+  border: 4px solid #333;
+  border-top: 4px solid var(--color-neon, #ff6b00);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+/* Animación de pulso para indicadores */
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+/* Input range styling para el editor 3D */
+input[type="range"] {
+  -webkit-appearance: none;
+  width: 100%;
+  height: 6px;
+  border-radius: 3px;
+  background: rgba(255, 255, 255, 0.1);
+  outline: none;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--color-neon, #ff6b00);
+  cursor: pointer;
+  transition: background 0.15s ease-in-out;
+}
+
+input[type="range"]::-webkit-slider-thumb:hover {
+  background: #ff8533;
+}
+
+input[type="range"]::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--color-neon, #ff6b00);
+  cursor: pointer;
+  border: none;
+}

@@ -31,7 +31,7 @@ export const useNeonEditor = () => {
   const [orientacion, setOrientacion] = useState("horizontal");
   const [textoAdicional, setTextoAdicional] = useState("");
   const [logo, setLogo] = useState(null);
-  const [modoIntegracionLogo, setModoIntegracionLogo] = useState("ia");
+  const [modoIntegracionLogo, setModoIntegracionLogo] = useState("exacto");
   const [fachada, setFachada] = useState("blanca");
   const [fachadaPersonalizada, setFachadaPersonalizada] = useState(null);
   const [estiloVisual, setEstiloVisual] = useState("moderno");
@@ -44,6 +44,20 @@ export const useNeonEditor = () => {
   const [acabadoSuperficial, setAcabadoSuperficial] = useState("lacado-brillo");
   const [tipoNegocioLona, setTipoNegocioLona] = useState("general");
   const [estiloLona, setEstiloLona] = useState("moderno");
+
+  // Estados de iluminación y post-procesado 3D
+  const [iluminacionHDRI, setIluminacionHDRI] = useState("studio");
+  const [postProcessing, setPostProcessing] = useState({
+    bloom: true,
+    fxaa: true,
+    toneMapping: true,
+    contrast: 1.0,
+    brightness: 1.0
+  });
+
+  // Estados para variaciones y upscale
+  const [variacionesColor, setVariacionesColor] = useState([]);
+  const [isUpscaling, setIsUpscaling] = useState(false);
 
   // Color picker
   const [colorPickerTab, setColorPickerTab] = useState("visualizer");
@@ -67,10 +81,13 @@ export const useNeonEditor = () => {
   const [imagenActiva, setImagenActiva] = useState('rotulo');
   const [errorGeneracion, setErrorGeneracion] = useState(null);
   const [progresoGeneracion, setProgresoGeneracion] = useState(0);
+  const [setsGenerados, setSetsGenerados] = useState([]); // [ { rotulo, mockup }, { rotulo, mockup } ]
+  const [setActivo, setSetActivo] = useState(0); // 0 o 1
 
-  // Tema
+  // Tema y modo de visualización
   const [theme, setTheme] = useState(() => localStorage.getItem("rotularte-theme") || "industrial");
   const [neonColor, setNeonColor] = useState(() => localStorage.getItem("rotularte-color") || "#ff6b00");
+  const [modoVisualizacion, setModoVisualizacion] = useState(() => localStorage.getItem("rotularte-modo") || "wizard"); // 'wizard' | 'completo'
 
   // Cargar parámetros URL
   useEffect(() => {
@@ -103,7 +120,8 @@ export const useNeonEditor = () => {
     document.documentElement.style.setProperty("--color-metal", config.metal);
     localStorage.setItem("rotularte-theme", theme);
     localStorage.setItem("rotularte-color", neonColor);
-  }, [theme, neonColor]);
+    localStorage.setItem("rotularte-modo", modoVisualizacion);
+  }, [theme, neonColor, modoVisualizacion]);
 
   // Handlers
   const agregarColor = (color) => {
@@ -133,7 +151,10 @@ export const useNeonEditor = () => {
     const file = e.target.files[0];
     if (file) {
       const reader = new FileReader();
-      reader.onload = (e) => setFachadaPersonalizada(e.target.result);
+      reader.onload = (e) => {
+        setFachadaPersonalizada(e.target.result);
+        setFachada('personalizada');
+      };
       reader.readAsDataURL(file);
     }
   };
@@ -178,6 +199,44 @@ export const useNeonEditor = () => {
     if (!tipoLetraCorporea) return [];
     return ESPESORES_POR_TIPO[tipoLetraCorporea] || [];
   };
+  const mostrarSelectorAcabado = () => categoria === "letras-corporeas" && tipoLetraCorporea && !tipoLetraCorporea.includes("sin-luz");
+
+  // Generar variaciones de color
+  const generarVariacionesColor = () => {
+    if (coloresDiseño.length === 0) return;
+    const variaciones = [];
+    for (let i = 0; i < 4; i++) {
+      variaciones.push({
+        id: i,
+        colores: coloresDiseño.map(c => ({
+          ...c,
+          hex: ajustarMatiz(c.hex, i * 30)
+        }))
+      });
+    }
+    setVariacionesColor(variaciones);
+  };
+
+  // Ajustar matiz de un color (simulación)
+  const ajustarMatiz = (hex, shift) => {
+    // Simplificación: retornar colores predefinidos de variación
+    const variaciones = ["#FF6B6B", "#4ECDC4", "#45B7D1", "#96CEB4", "#FECA57", "#FF9FF3"];
+    return variaciones[Math.floor(Math.random() * variaciones.length)];
+  };
+
+  // Upscale de imagen
+  const mejorarResolucion = async (imagenUrl) => {
+    setIsUpscaling(true);
+    // Simulación de proceso de upscale
+    await new Promise(resolve => setTimeout(resolve, 2000));
+    setIsUpscaling(false);
+    return imagenUrl; // En producción, aquí se llamaría a la API
+  };
+
+  // Toggle post-processing
+  const togglePostProcessing = (key) => {
+    setPostProcessing(prev => ({ ...prev, [key]: !prev[key] }));
+  };
 
   return {
     // Refs
@@ -210,6 +269,15 @@ export const useNeonEditor = () => {
     acabadoSuperficial, setAcabadoSuperficial,
     tipoNegocioLona, setTipoNegocioLona,
     estiloLona, setEstiloLona,
+    // Iluminación y post-procesado
+    iluminacionHDRI, setIluminacionHDRI,
+    postProcessing, setPostProcessing,
+    togglePostProcessing,
+    // Variaciones y upscale
+    variacionesColor, setVariacionesColor,
+    isUpscaling, setIsUpscaling,
+    generarVariacionesColor,
+    mejorarResolucion,
     // Color picker
     colorPickerTab, setColorPickerTab,
     colorHSB, setColorHSB,
@@ -229,9 +297,12 @@ export const useNeonEditor = () => {
     imagenActiva, setImagenActiva,
     errorGeneracion, setErrorGeneracion,
     progresoGeneracion, setProgresoGeneracion,
-    // Tema
+    setsGenerados, setSetsGenerados,
+    setActivo, setSetActivo,
+    // Tema y modo
     theme, setTheme,
     neonColor, setNeonColor,
+    modoVisualizacion, setModoVisualizacion,
     // Handlers
     agregarColor,
     eliminarColor,
@@ -245,6 +316,7 @@ export const useNeonEditor = () => {
     mostrarSelectorCorporea,
     mostrarSelectorLuzLed,
     mostrarSelectorMaterialLaser,
+    mostrarSelectorAcabado,
     mostrarConfiguracionLona,
     getEspesoresDisponibles,
     navigate,
