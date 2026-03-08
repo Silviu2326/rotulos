@@ -1235,75 +1235,163 @@
    RESPONSIVE
    ========================================================================== */
 
+@media (max-width: 1024px) {
+  /* En tablet el sidebar se convierte en layout vertical */
+  .disenador-sidebar {
+    height: auto;
+    overflow: visible;
+  }
+
+  .sidebar-contenido {
+    overflow-y: auto;
+  }
+}
+
 @media (max-width: 768px) {
   .paso-contenido {
     padding: 12px;
   }
-  
+
+  /* Categorías en 2 columnas en móvil (más compacto que 1) */
   .grid-categorias {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, 1fr);
     gap: 8px;
   }
-  
+
   .categoria-card {
-    padding: 12px;
+    padding: 10px 8px;
   }
-  
+
+  .categoria-imagen {
+    height: 70px;
+  }
+
+  .categoria-nombre {
+    font-size: 0.78rem;
+  }
+
+  .categoria-desc {
+    font-size: 0.65rem;
+  }
+
   .selector-tipografia {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(3, 1fr);
   }
-  
+
   .estilo-grid {
     grid-template-columns: repeat(2, 1fr);
   }
-  
+
   .material-grid {
     grid-template-columns: repeat(3, 1fr);
   }
-  
+
   .fachada-grid {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(3, 1fr);
   }
-  
+
   .paso-titulo {
     font-size: 1rem;
   }
-  
+
   .paso-descripcion {
     font-size: 0.75rem;
-    margin-bottom: 12px;
+    margin-bottom: 10px;
   }
-  
+
+  /* Indicador de pasos más compacto */
   .pasos-indicador {
-    padding: 10px 12px;
+    padding: 8px 12px;
     gap: 2px;
   }
-  
+
   .paso-indicador {
-    min-width: 45px;
+    min-width: 44px;
     padding: 5px 6px;
   }
-  
+
   .paso-nombre {
     font-size: 0.55rem;
   }
-  
+
+  .paso-numero {
+    width: 22px;
+    height: 22px;
+    font-size: 0.7rem;
+  }
+
+  .paso-connector {
+    width: 10px;
+  }
+
+  .form-group {
+    margin-bottom: 10px;
+  }
+
+  /* Footer más compacto */
+  .sidebar-footer {
+    padding: 10px 12px;
+  }
+
+  .btn-generar {
+    padding: 10px 14px;
+    font-size: 0.85rem;
+  }
+
+  .navegacion-pasos {
+    gap: 6px;
+    margin-bottom: 8px;
+  }
+}
+
+@media (max-width: 480px) {
+  /* Móvil pequeño: categorías en 2 col pero más pequeñas */
+  .grid-categorias {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 6px;
+  }
+
+  .categoria-imagen {
+    height: 60px;
+  }
+
+  .selector-tipografia {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .material-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .fachada-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .checkbox-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .pasos-indicador {
+    padding: 6px 8px;
+  }
+
+  .paso-indicador {
+    min-width: 38px;
+    padding: 4px 5px;
+  }
+
+  .paso-nombre {
+    font-size: 0.5rem;
+  }
+
   .paso-numero {
     width: 20px;
     height: 20px;
     font-size: 0.65rem;
   }
-  
+
   .paso-connector {
-    width: 8px;
-  }
-  
-  .form-group {
-    margin-bottom: 10px;
-  }
-  
-  .sidebar-footer {
-    padding: 10px 12px;
+    width: 6px;
   }
 }
 
