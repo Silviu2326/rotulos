@@ -30,6 +30,7 @@ import HomePage from "./pages/HomePage";
 import NeonEditorPage from "./pages/NeonEditorPage";
 import StorePage from "./pages/StorePage";
 import PromptConfigPage from "./pages/PromptConfigPage";
+import Scene3DTestPage from "./pages/Scene3DTestPage";
 
 import "./styles/sidebar.css";
 import "./styles/header.css";
@@ -386,6 +387,7 @@ function App() {
       <Route path="/editor" element={<NeonEditorPage />} />
       <Route path="/tienda" element={<StorePage />} />
       <Route path="/prompt-config" element={<PromptConfigPage />} />
+      <Route path="/test-3d" element={<Scene3DTestPage />} />
 
       {/* Ruta de landing original */}
       <Route

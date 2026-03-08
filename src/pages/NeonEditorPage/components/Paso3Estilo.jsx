@@ -1,4 +1,4 @@
-import { Upload, Sparkles, Maximize2 } from "lucide-react";
+import { Upload, Sparkles, Maximize2, Image as ImageIcon, Wand2 } from "lucide-react";
 import {
   ESTILOS_VISUALES,
   TIPOS_LETRAS_CORPOREAS,
@@ -51,6 +51,10 @@ export const Paso3Estilo = ({
   mostrarSelectorAcabado,
   mostrarConfiguracionLona,
   getEspesoresDisponibles,
+  // Sistema híbrido de lonas
+  usarSistemaHibridoLona,
+  setUsarSistemaHibridoLona,
+  onAbrirGeneradorLona,
 }) => {
   const handleSubirFachada = (e) => {
     const file = e.target.files[0];
@@ -202,6 +206,39 @@ export const Paso3Estilo = ({
       {/* Configuración de Lona */}
       {mostrarConfiguracionLona() && (
         <>
+          {/* Toggle Sistema Híbrido */}
+          <div className="form-group">
+            <div className="sistema-hibrido-header">
+              <label className="form-label">
+                <Wand2 size={18} />
+                Sistema Híbrido de Lonas (Recomendado)
+              </label>
+              <label className="toggle-switch">
+                <input
+                  type="checkbox"
+                  checked={usarSistemaHibridoLona}
+                  onChange={(e) => setUsarSistemaHibridoLona(e.target.checked)}
+                />
+                <span className="toggle-slider"></span>
+              </label>
+            </div>
+            <p className="sistema-hibrido-desc">
+              {usarSistemaHibridoLona 
+                ? "✨ Ideogram genera fondos decorativos sin texto + Canvas superpone texto perfecto"
+                : "Modo tradicional: IA genera lona completa con texto integrado"}
+            </p>
+            
+            {usarSistemaHibridoLona && (
+              <button 
+                className="btn-generar-lona-hibrida"
+                onClick={onAbrirGeneradorLona}
+              >
+                <ImageIcon size={18} />
+                Abrir Generador de Lonas Híbrido
+              </button>
+            )}
+          </div>
+
           <div className="form-group">
             <label className="form-label">Tipo de Negocio</label>
             <div className="estilo-grid">

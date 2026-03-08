@@ -83,6 +83,12 @@ export const useNeonEditor = () => {
   const [progresoGeneracion, setProgresoGeneracion] = useState(0);
   const [setsGenerados, setSetsGenerados] = useState([]); // [ { rotulo, mockup }, { rotulo, mockup } ]
   const [setActivo, setSetActivo] = useState(0); // 0 o 1
+  
+  // Estados para sistema híbrido de lonas (Ideogram + Canvas)
+  const [mostrarGeneradorLona, setMostrarGeneradorLona] = useState(false);
+  const [fondosLonaGenerados, setFondosLonaGenerados] = useState([]);
+  const [lonaHibridaResultado, setLonaHibridaResultado] = useState(null);
+  const [usarSistemaHibridoLona, setUsarSistemaHibridoLona] = useState(true); // Default true para lonas
 
   // Tema y modo de visualización
   const [theme, setTheme] = useState(() => localStorage.getItem("rotularte-theme") || "industrial");
@@ -299,6 +305,11 @@ export const useNeonEditor = () => {
     progresoGeneracion, setProgresoGeneracion,
     setsGenerados, setSetsGenerados,
     setActivo, setSetActivo,
+    // Sistema híbrido de lonas
+    mostrarGeneradorLona, setMostrarGeneradorLona,
+    fondosLonaGenerados, setFondosLonaGenerados,
+    lonaHibridaResultado, setLonaHibridaResultado,
+    usarSistemaHibridoLona, setUsarSistemaHibridoLona,
     // Tema y modo
     theme, setTheme,
     neonColor, setNeonColor,

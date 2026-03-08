@@ -1,8 +1,9 @@
 import { useState, lazy, Suspense } from 'react';
-import { Box, Eye, Layers, Loader2 } from 'lucide-react';
+import { Box, Eye, Layers, Loader2, Info } from 'lucide-react';
 
-// Lazy load del componente 3D
-const Scene3D = lazy(() => import('../Scene3D'));
+// Lazy load del componente 3D (para corpóreas y neon)
+const Scene3D = lazy(() => import('../Scene3D/index.jsx')); 
+// Nota: Importamos el archivo .jsx directamente para evitar problemas con el barrel export
 
 export const TabMockup = ({
   showPreview,
@@ -12,7 +13,11 @@ export const TabMockup = ({
   setErrorGeneracion,
   setsGenerados,
   mockups,
-  nombreNegocio
+  nombreNegocio,
+  categoria,
+  corporeaType,
+  relief,
+  colorLuzLed
 }) => {
   const [vistaActiva, setVistaActiva] = useState('2d'); // '2d' o '3d'
   
@@ -39,6 +44,20 @@ export const TabMockup = ({
 
   const imagenMockup = getVariacion2Exterior();
   const imagenRotulo = getRotuloAislado();
+  
+  // DEBUG: Mostrar siempre el botón 3D para testing
+  // Las categorías con relieve son letras-corporeas y letras-neon
+  const esCategoria3D = ['letras-corporeas', 'letras-neon'].includes(categoria);
+  const usaEditor3D = esCategoria3D || !!imagenMockup;
+  
+  // Debug detallado
+  console.log('=== TabMockup Debug ===');
+  console.log('categoria:', categoria);
+  console.log('esCategoria3D:', esCategoria3D);
+  console.log('imagenMockup existe:', !!imagenMockup);
+  console.log('imagenRotulo existe:', !!imagenRotulo);
+  console.log('usaEditor3D:', usaEditor3D);
+  console.log('======================');
 
   if (!showPreview) {
     return (
@@ -53,10 +72,12 @@ export const TabMockup = ({
           gap: '16px'
         }}>
           <Box size={64} opacity={0.3} />
-          <p>Genera un diseño para ver el mockup en 3D</p>
-          <p style={{ fontSize: '0.8rem', opacity: 0.6 }}>
-            El editor 3D permite visualizar el relieve y profundidad real del rótulo
-          </p>
+          <p>Genera un diseño para ver el mockup</p>
+          {usaEditor3D && (
+            <p style={{ fontSize: '0.8rem', opacity: 0.6 }}>
+              Las letras corpóreas y neón incluyen editor 3D con relieve real
+            </p>
+          )}
         </div>
       </div>
     );
@@ -123,7 +144,7 @@ export const TabMockup = ({
               background: 'var(--color-neon, #ff6b00)',
               color: '#000',
               cursor: 'pointer',
-              fontWeight: '600'
+              fontWeight: 600
             }}
           >
             Intentar de nuevo
@@ -174,36 +195,38 @@ export const TabMockup = ({
             Vista 2D
           </button>
           
-          <button
-            onClick={() => setVistaActiva('3d')}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px',
-              padding: '10px 18px',
-              borderRadius: '8px',
-              border: 'none',
-              background: vistaActiva === '3d' ? 'var(--color-neon, #ff6b00)' : 'rgba(255,255,255,0.1)',
-              color: vistaActiva === '3d' ? '#000' : '#fff',
-              cursor: 'pointer',
-              fontSize: '0.9rem',
-              fontWeight: 600,
-              transition: 'all 0.2s ease'
-            }}
-          >
-            <Box size={18} />
-            Editor 3D
-            <span style={{
-              fontSize: '0.65rem',
-              background: vistaActiva === '3d' ? 'rgba(0,0,0,0.2)' : 'var(--color-neon)',
-              color: vistaActiva === '3d' ? '#000' : '#000',
-              padding: '2px 6px',
-              borderRadius: '4px',
-              marginLeft: '4px'
-            }}>
-              NUEVO
-            </span>
-          </button>
+          {usaEditor3D && (
+            <button
+              onClick={() => setVistaActiva('3d')}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                padding: '10px 18px',
+                borderRadius: '8px',
+                border: 'none',
+                background: vistaActiva === '3d' ? 'var(--color-neon, #ff6b00)' : 'rgba(255,255,255,0.1)',
+                color: vistaActiva === '3d' ? '#000' : '#fff',
+                cursor: 'pointer',
+                fontSize: '0.9rem',
+                fontWeight: 600,
+                transition: 'all 0.2s ease'
+              }}
+            >
+              <Box size={18} />
+              Editor 3D
+              <span style={{
+                fontSize: '0.65rem',
+                background: vistaActiva === '3d' ? 'rgba(0,0,0,0.2)' : 'var(--color-neon)',
+                color: vistaActiva === '3d' ? '#000' : '#000',
+                padding: '2px 6px',
+                borderRadius: '4px',
+                marginLeft: '4px'
+              }}>
+                3D
+              </span>
+            </button>
+          )}
         </div>
 
         {/* Info del modo */}
@@ -214,12 +237,17 @@ export const TabMockup = ({
           fontSize: '0.8rem',
           color: '#888'
         }}>
-          {vistaActiva === '3d' && (
+          {vistaActiva === '3d' && usaEditor3D ? (
             <>
               <Layers size={16} />
-              <span>Relieve automático desde imagen</span>
+              <span>Extrusión real: {relief || 8}cm</span>
             </>
-          )}
+          ) : vistaActiva === '3d' && !usaEditor3D ? (
+            <>
+              <Info size={16} />
+              <span>Editor 3D solo disponible para letras corpóreas y neón</span>
+            </>
+          ) : null}
         </div>
       </div>
 
@@ -232,7 +260,7 @@ export const TabMockup = ({
         background: 'var(--color-bg-alt)'
       }}>
         {vistaActiva === '2d' ? (
-          // Vista 2D - Imagen estática
+          // Vista 2D - Imagen estática (todas las categorías)
           <div style={{
             height: '100%',
             display: 'flex',
@@ -287,14 +315,14 @@ export const TabMockup = ({
               </div>
             )}
           </div>
-        ) : (
-          // Vista 3D - Editor completo
+        ) : usaEditor3D ? (
+          // Vista 3D - Para letras corpóreas y neón
           <div style={{
             height: '100%',
             borderRadius: '12px',
             overflow: 'hidden'
           }}>
-            {imagenMockup && imagenRotulo ? (
+            {imagenRotulo ? (
               <Suspense fallback={
                 <div style={{
                   height: '100%',
@@ -312,15 +340,49 @@ export const TabMockup = ({
                   <div style={{ textAlign: 'center' }}>
                     <p style={{ marginBottom: '8px' }}>Cargando editor 3D...</p>
                     <p style={{ fontSize: '0.8rem', opacity: 0.6 }}>
-                      Analizando relieve de la imagen
+                      Analizando contornos y generando geometría
                     </p>
                   </div>
                 </div>
               }>
                 <Scene3D 
-                  fachadaUrl={imagenMockup}
-                  rotuloUrl={imagenRotulo}
-                  nombreNegocio={nombreNegocio}
+                  imageUrl={imagenRotulo}
+                  corporeaType={corporeaType || 'aluminio-sin-luz'}
+                  relief={relief || 8}
+                  luzColor={colorLuzLed || 'blanco-calido'}
+                  wallType="white-wall"
+                />
+              </Suspense>
+            ) : imagenMockup ? (
+              // Fallback: usar mockup si no hay rótulo aislado
+              <Suspense fallback={
+                <div style={{
+                  height: '100%',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '20px',
+                  color: '#666'
+                }}>
+                  <Loader2 size={48} style={{ 
+                    animation: 'spin 1s linear infinite',
+                    color: 'var(--color-neon)'
+                  }} />
+                  <div style={{ textAlign: 'center' }}>
+                    <p style={{ marginBottom: '8px' }}>Cargando editor 3D...</p>
+                    <p style={{ fontSize: '0.8rem', opacity: 0.6 }}>
+                      Detectando contornos automáticamente
+                    </p>
+                  </div>
+                </div>
+              }>
+                <Scene3D 
+                  imageUrl={imagenMockup}
+                  corporeaType={corporeaType || 'aluminio-sin-luz'}
+                  relief={relief || 8}
+                  luzColor={colorLuzLed || 'blanco-calido'}
+                  wallType="white-wall"
                 />
               </Suspense>
             ) : (
@@ -336,15 +398,52 @@ export const TabMockup = ({
                 padding: '40px'
               }}>
                 <Box size={64} opacity={0.3} />
-                <p>Se necesita el mockup y el rótulo para el editor 3D</p>
+                <p>Se necesita una imagen para el editor 3D</p>
                 <p style={{ fontSize: '0.8rem', opacity: 0.6 }}>
-                  Genera ambas variaciones primero
+                  El editor detectará automáticamente el fondo y creará la vista 3D
                 </p>
               </div>
             )}
+          </div>
+        ) : (
+          // Mensaje para categorías sin editor 3D
+          <div style={{
+            height: '100%',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '16px',
+            color: '#666',
+            textAlign: 'center',
+            padding: '40px'
+          }}>
+            <Info size={64} opacity={0.3} />
+            <p>El editor 3D avanzado solo está disponible para Letras Corpóreas</p>
+            <p style={{ fontSize: '0.8rem', opacity: 0.6, maxWidth: '400px' }}>
+              Las letras corpóreas requieren visualización de volumen real debido a su profundidad física (5-14cm).
+              Las demás categorías se visualizan correctamente en 2D.
+            </p>
+            <button
+              onClick={() => setVistaActiva('2d')}
+              style={{
+                marginTop: '16px',
+                padding: '12px 24px',
+                borderRadius: '8px',
+                border: 'none',
+                background: 'var(--color-neon, #ff6b00)',
+                color: '#000',
+                cursor: 'pointer',
+                fontWeight: 600
+              }}
+            >
+              Ver en 2D
+            </button>
           </div>
         )}
       </div>
     </div>
   );
 };
+
+export default TabMockup;

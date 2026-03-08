@@ -1,11 +1,12 @@
 import React from "react";
-import { ChevronUp, ChevronDown, Sparkles, ShoppingCart } from "lucide-react";
+import { ChevronUp, ChevronDown, Sparkles, ShoppingCart, Search, User, Play, Wand2, ImageOff, ZoomIn, Palette, Eye, Smartphone, Check } from "lucide-react";
 import { useNeonEditor } from "./hooks/useNeonEditor";
 import { Paso1Producto } from "./components/Paso1Producto";
 import { Paso2Negocio } from "./components/Paso2Negocio";
 import { Paso3Estilo } from "./components/Paso3Estilo";
 import { Paso4Descripcion } from "./components/Paso4Descripcion";
 import { FloatingThemeMenu } from "./components/FloatingThemeMenu";
+import { GeneradorLonaHibrida } from "./components/GeneradorLonaHibrida";
 import { TABS_PREVIEW } from "./data/constants";
 import "../../styles/rotularte.css";
 import "../../styles/neoneditor.css";
@@ -110,6 +111,13 @@ function NeonEditorPage() {
       setErrores(nuevosErrores);
       return;
     }
+    
+    // Si es lona y sistema híbrido está activo, abrir generador especial
+    if (categoria === 'lonas-pancartas' && hook.usarSistemaHibridoLona) {
+      hook.setMostrarGeneradorLona(true);
+      return;
+    }
+    
     // Generar directamente sin modal de lead
     await iniciarGeneracion();
   };
@@ -316,6 +324,10 @@ function NeonEditorPage() {
     mostrarSelectorAcabado: hook.mostrarSelectorAcabado,
     mostrarConfiguracionLona: hook.mostrarConfiguracionLona,
     getEspesoresDisponibles: hook.getEspesoresDisponibles,
+    // Sistema híbrido de lonas
+    usarSistemaHibridoLona: hook.usarSistemaHibridoLona,
+    setUsarSistemaHibridoLona: hook.setUsarSistemaHibridoLona,
+    onAbrirGeneradorLona: () => hook.setMostrarGeneradorLona(true),
   };
 
   const paso4Props = {
@@ -402,6 +414,10 @@ function NeonEditorPage() {
           setsGenerados={setsGenerados}
           mockups={mockups}
           nombreNegocio={nombreNegocio}
+          categoria={categoria}
+          corporeaType={hook.tipoLetraCorporea}
+          relief={hook.espesor}
+          colorLuzLed={hook.colorLuzLed}
         />;
       case "ar":
         return <TabAR showPreview={showPreview} />;
@@ -413,30 +429,69 @@ function NeonEditorPage() {
   };
 
   return (
-    <div className="neon-editor-page disenador-ia">
-      <nav className="nav-editor">
-        <a href="#" className="logo-rotularte" onClick={(e) => { e.preventDefault(); navigate("/"); }}>
-          ROTULARTE
-        </a>
-        <ul className="nav-links-rotularte">
-          <li><a href="#" onClick={(e) => { e.preventDefault(); navigate("/"); }}>Inicio</a></li>
-          <li><a href="#" onClick={(e) => { e.preventDefault(); navigate("/tienda"); }}>Tienda</a></li>
-          <li><a href="#" className="active">Diseñador IA</a></li>
-          <li>
-            <div className="cart-icon" onClick={() => navigate("/tienda")}>
-              <ShoppingCart size={24} />
-              <span className="cart-count">0</span>
+    <div className="neon-editor-page disenador-ia" data-theme={theme}>
+      {/* Header del Editor - Estilo tema con dos niveles */}
+      <header className="editor-header">
+        {/* Barra superior - Info y acciones */}
+        <div className="editor-header-top">
+          <div className="editor-header-container">
+            {/* Logo RotulemOS */}
+            <a href="#" className="editor-logo" onClick={(e) => { e.preventDefault(); navigate("/"); }}>
+              <span className="editor-logo-text">Rótulos</span>
+            </a>
+            
+            {/* Info de contacto */}
+            <div className="editor-header-info">
+              <span>Lunes a Viernes: <strong>8:30 - 20:00h</strong></span>
+              <span>Tel: <strong>960 624 225</strong></span>
             </div>
-          </li>
-        </ul>
-      </nav>
+            
+            {/* Búsqueda */}
+            <div className="editor-header-search">
+              <Search size={16} />
+              <input type="text" placeholder="Busca rótulos, vinilos, neón..." />
+            </div>
+            
+            {/* Iconos de acción */}
+            <div className="editor-header-actions">
+              <button className="editor-icon-btn" onClick={() => navigate("/cuenta")} title="Mi cuenta">
+                <User size={20} />
+              </button>
+              <button className="editor-icon-btn editor-cart-btn" onClick={() => navigate("/tienda")} title="Carrito">
+                <ShoppingCart size={20} />
+                <span className="editor-cart-badge">0</span>
+              </button>
+            </div>
+          </div>
+        </div>
+        
+        {/* Barra inferior - Branding y navegación */}
+        <div className="editor-header-bottom">
+          <div className="editor-header-container">
+            {/* Branding del diseñador */}
+            <div className="editor-brand">
+              <h1>DISEÑADOR IA</h1>
+              <span className="editor-ultra-badge">ULTRA</span>
+            </div>
+            
+            {/* Botones de acción */}
+            <div className="editor-header-buttons">
+              <button className="editor-btn-tutorial" onClick={() => window.open('https://www.youtube.com', '_blank')}>
+                <Play size={14} fill="currentColor" />
+                TUTORIAL
+              </button>
+              <button className="editor-btn-tienda" onClick={() => navigate("/tienda")}>
+                <ShoppingCart size={16} />
+                Ir a la Tienda
+              </button>
+            </div>
+          </div>
+        </div>
+      </header>
 
       <div className="disenador-contenido">
         <aside className="disenador-sidebar">
-          <div className="sidebar-header">
-            <h1>Diseñador IA</h1>
-            <p>Crea tu rótulo profesional</p>
-          </div>
+         
 
           {/* Pasos indicador - solo en modo wizard */}
           {modoVisualizacion === 'wizard' && (
@@ -523,6 +578,91 @@ function NeonEditorPage() {
             {renderPreviewContent()}
           </div>
         </section>
+        
+        {/* Panel de Herramientas IA */}
+        <aside className="tools-panel">
+          <div className="tools-header">
+            <Wand2 size={20} />
+            <h3>Herramientas IA</h3>
+          </div>
+          
+          <div className="tools-list">
+            {/* Quitar Fondo */}
+            <div className="tool-card">
+              <div className="tool-header">
+                <div className="tool-icon-wrapper">
+                  <ImageOff size={18} />
+                </div>
+                <div className="tool-info">
+                  <h4>Quitar Fondo</h4>
+                  <p>Remove.bg - Alta precisión</p>
+                </div>
+                <span className="tool-badge ready">Listo</span>
+              </div>
+              <button className="tool-btn">Aplicar</button>
+            </div>
+            
+            {/* Mejorar Calidad */}
+            <div className="tool-card">
+              <div className="tool-header">
+                <div className="tool-icon-wrapper">
+                  <ZoomIn size={18} />
+                </div>
+                <div className="tool-info">
+                  <h4>Mejorar Calidad 4x</h4>
+                  <p>Real-ESRGAN - HD profesional</p>
+                </div>
+                <span className="tool-badge ready">Listo</span>
+              </div>
+              <button className="tool-btn">Aplicar</button>
+            </div>
+            
+            {/* Variaciones de Color */}
+            <div className="tool-card">
+              <div className="tool-header">
+                <div className="tool-icon-wrapper">
+                  <Palette size={18} />
+                </div>
+                <div className="tool-info">
+                  <h4>Variaciones de Color</h4>
+                  <p>Ver en diferentes colores</p>
+                </div>
+                <span className="tool-badge new">Nuevo</span>
+              </div>
+              <button className="tool-btn">Generar</button>
+            </div>
+            
+            {/* Análisis Legibilidad */}
+            <div className="tool-card">
+              <div className="tool-header">
+                <div className="tool-icon-wrapper">
+                  <Eye size={18} />
+                </div>
+                <div className="tool-info">
+                  <h4>Análisis Legibilidad</h4>
+                  <p>¿Se lee bien a distancia?</p>
+                </div>
+                <span className="tool-badge ready">Listo</span>
+              </div>
+              <button className="tool-btn">Analizar</button>
+            </div>
+            
+            {/* Realidad Aumentada */}
+            <div className="tool-card">
+              <div className="tool-header">
+                <div className="tool-icon-wrapper">
+                  <Smartphone size={18} />
+                </div>
+                <div className="tool-info">
+                  <h4>Realidad Aumentada</h4>
+                  <p>Ver en tu local real</p>
+                </div>
+                <span className="tool-badge new">Nuevo</span>
+              </div>
+              <button className="tool-btn">Iniciar AR</button>
+            </div>
+          </div>
+        </aside>
       </div>
 
       {/* Botón flotante de temas */}
@@ -534,6 +674,39 @@ function NeonEditorPage() {
         modoVisualizacion={modoVisualizacion}
         setModoVisualizacion={setModoVisualizacion}
       />
+
+      {/* Modal: Generador de Lonas Híbrido */}
+      {hook.mostrarGeneradorLona && (
+        <div className="modal-overlay" style={{
+          position: 'fixed',
+          inset: 0,
+          background: 'rgba(0,0,0,0.9)',
+          zIndex: 1000,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          padding: '20px'
+        }}>
+          <GeneradorLonaHibrida
+            datosIniciales={{
+              tipoNegocio: hook.tipoNegocioLona,
+              estilo: hook.estiloLona,
+              colores: hook.coloresDiseño,
+              orientacion: hook.orientacion,
+              nombreNegocio: hook.nombreNegocio,
+              textoAdicional: hook.textoAdicional,
+              tipografia: hook.tipografia
+            }}
+            onCompletar={(resultado) => {
+              hook.setLonaHibridaResultado(resultado);
+              hook.setRotuloAislado(resultado.imagenBase64);
+              hook.setMostrarGeneradorLona(false);
+              hook.setShowPreview(true);
+            }}
+            onCancelar={() => hook.setMostrarGeneradorLona(false)}
+          />
+        </div>
+      )}
     </div>
   );
 }
